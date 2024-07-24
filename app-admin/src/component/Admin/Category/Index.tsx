@@ -13,8 +13,7 @@ const Index = () => {
                   <h4 className="card-title">Loại sản phẩm </h4>
                   <a
                     className="btn btn-primary btn-round ms-auto"
-                    asp-controller="HomeAdmin"
-                    asp-action="Create"
+                    href='/category/create'
                   >
                     <i className="fa fa-plus"></i> Thêm loại sản phẩm
                   </a>
@@ -44,11 +43,9 @@ const Index = () => {
                         <td>
                           <div className="form-button-action">
                             <a
-                              type="button"
+                              href='category/update'
                               className="btn btn-link btn-primary btn-lg"
-                              asp-controller="HomeAdmin"
-                              asp-action="Edit"
-                              asp-route-id="@item.ID_SAN_PHAM"
+                             
                             >
                               <i className="fa fa-edit"></i>
                             </a>

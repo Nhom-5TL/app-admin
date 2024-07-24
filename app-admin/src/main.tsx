@@ -3,8 +3,12 @@ import ReactDOM from 'react-dom/client'
 
 import Home from './component/Admin/Home/Index'
 import Product from './component/Admin/Product/Index'
-import Category from './component/Admin/Category/Index'
 import CreateProduct from './component/Admin/Product/CreateProduct'
+import EditProduct from './component/Admin/Product/EditProduct'
+import Category from './component/Admin/Category/Index'
+import Create from './component/Admin/Category/Create'
+import UpdateCategory from './component/Admin/Category/UpdateCategory'
+
 
 import {
   createBrowserRouter,
@@ -26,13 +30,28 @@ const router = createBrowserRouter([
         element: <Product/>
       },
       {
+        path: "/product/create",
+        element: <CreateProduct/>
+      },
+      {
+        path: "/product/Edit",
+        element: <EditProduct/>
+      },
+      {
         path: "/category",
         element: <Category/>
       },
       {
-        path: "/product/create",
-        element: <CreateProduct/>
+        path: "/category/create",
+        element: <Create/>
+        
       },
+      {
+        path: "/category/update",
+        element: <UpdateCategory/>
+        
+      }
+
     ],
   },
 ]);

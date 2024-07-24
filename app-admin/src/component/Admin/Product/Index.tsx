@@ -47,11 +47,9 @@ const Index = () => {
                         <td>
                           <div className="form-button-action">
                             <a
-                              type="button"
+                              href="/product/Edit"
                               className="btn btn-link btn-primary btn-lg"
-                              asp-controller="HomeAdmin"
-                              asp-action="Edit"
-                              asp-route-id="@item.ID_SAN_PHAM"
+                              
                             >
                               <i className="fa fa-edit"></i> Sửa
                             </a>

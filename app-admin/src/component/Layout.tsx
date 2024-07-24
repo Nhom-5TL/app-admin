@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "./Admin/Header";
-import Footer from "./Admin/Footer";
+
 import { Outlet } from "react-router-dom";
 
 const Layout = () => {
@@ -12,7 +12,7 @@ const Layout = () => {
         </div>
         <div className="col-lg-9">
           <Outlet />
-          <Footer />
+       
         </div>
       </div>
 
