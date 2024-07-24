@@ -65,7 +65,6 @@ const Index = () => {
                   <table id="add-row" className="display table table-striped table-hover">
                     <thead>
                       <tr>
-                        <th>#</th>
                         <th>Tên loại</th>
                         <th>Thao tác</th>
                       </tr>
@@ -73,7 +72,6 @@ const Index = () => {
                     <tbody>
                       {categories.map(category => (
                         <tr key={category.maLoai}>
-                          <td>{category.maLoai}</td>
                           <td>{category.tenLoai}</td>
                           <td>
                             <Link to={`/category/update/${category.maLoai}`} className="btn btn-link btn-primary btn-lg">
