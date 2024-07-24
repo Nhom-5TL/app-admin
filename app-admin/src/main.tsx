@@ -47,7 +47,7 @@ const router = createBrowserRouter([
         
       },
       {
-        path: "/category/update",
+        path: "/category/update/:MaLoai",
         element: <UpdateCategory/>
         
       }
