@@ -1,8 +1,10 @@
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Create = () => {
   const [productName, setProductName] = useState('');
+  const navigate = useNavigate(); // Hook to navigate programmatically
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     setProductName(event.target.value);
@@ -15,10 +17,13 @@ const Create = () => {
         TenLoai: productName,
       });
       console.log('Loại sản phẩm mới được thêm:', response.data);
-      // Clear the input field after submission
-      setProductName('');
+      // Hiển thị thông báo
+      alert('Loại sản phẩm đã được thêm thành công!');
+      // Điều hướng về trang index
+      navigate('/category');
     } catch (error) {
       console.error('Lỗi khi thêm loại sản phẩm:', error);
+      alert('Đã xảy ra lỗi khi thêm loại sản phẩm!');
     }
   };
 
@@ -56,6 +61,7 @@ const Create = () => {
                           type="button"
                           className="btn btn-warning"
                           style={{ marginLeft: '10px' }}
+                          onClick={() => navigate('/category')}
                         >
                           Trở lại
                         </button>
