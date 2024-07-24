@@ -1,0 +1,25 @@
+/* layout.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .navbar {
+    position: fixed; /* Đặt navbar cố định */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Đảm bảo menu không bị đè bởi nội dung */
+    background-color: #fff; /* Màu nền của menu */
+    border-bottom: 1px solid #ddd; /* Viền dưới của menu */
+  }
+  
+  .container {
+    padding-top: 60px; /* Để nội dung không bị che khuất bởi menu */
+  }
+  
+  .page-inner {
+    padding: 20px; /* Khoảng cách nội dung từ các cạnh */
+  }
+  

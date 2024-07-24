@@ -1,14 +1,16 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 
-import Home from './component/Home/Index'
-import Product from './component/Product/Index'
+import Home from './component/Admin/Home/Index'
+import Product from './component/Admin/Product/Index'
+import Category from './component/Admin/Category/Index'
+import CreateProduct from './component/Admin/Product/CreateProduct'
 
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-import Layout from './component/Layout/Layout';
+import Layout from './component/Layout';
 
 const router = createBrowserRouter([
   {
@@ -22,7 +24,15 @@ const router = createBrowserRouter([
       {
         path: "/product",
         element: <Product/>
-      }
+      },
+      {
+        path: "/category",
+        element: <Category/>
+      },
+      {
+        path: "/product/create",
+        element: <CreateProduct/>
+      },
     ],
   },
 ]);
