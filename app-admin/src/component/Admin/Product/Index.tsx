@@ -1,6 +1,45 @@
-import React from "react";
+import React , {useEffect, useState }from "react";
 
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
+interface sanP {
+  maSP: number;
+  tenSP: string;
+  Anh: string;
+  tenNhanHieu: string;
+  maNhanHieu: number;
+  tenLoai: string;
+  maLoai: number;
+  gia: number;
+  htvc: number,
+  trangThai: number,
+}
 const Index = () => {
+  const [sanP, setSPH] = useState<sanP[]>([]);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchUsers = async () => {
+        const response = await axios.get(
+          "https://localhost:7095/api/SanPhams"
+        );
+        console.log("DATA:", response.data);
+
+        setSPH(response.data);
+    };
+
+    fetchUsers();
+  }, []);
+
+  const CtSP = async (maSP: number) => {
+    try {
+      const response = await axios.get<sanP[]>(`https://localhost:7095/api/SanPhams/${maSP}`);
+      console.log('Response data:', response.data); // Kiểm tra dữ liệu trả về
+      setSPH(response.data);
+      navigate(`./${maSP}`);
+    } catch (error) {
+      console.error('Error in CtWeb:', error);
+    }
+  };
   return (
   
     <div className="container">
@@ -29,6 +68,7 @@ const Index = () => {
                     <thead>
                       <tr>
                         <th>#</th>
+                        <th>Hinh</th>
                         <th>Tên sản phẩm</th>
                         <th>Số lượng</th>
                         <th>Giá</th>
@@ -38,32 +78,34 @@ const Index = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>12</td>
-                        <td>Giày Lukita</td>
-                        <td>900</td>
-                        <td>200.000đ</td>
-                        <td>23/07/2024</td>
-                        <td>
-                          <div className="form-button-action">
-                            <a
-                              href="/product/Edit"
-                              className="btn btn-link btn-primary btn-lg"
-                              
-                            >
-                              <i className="fa fa-edit"></i> Sửa
-                            </a>
-                            <button
-                              type="button"
-                              className="btn btn-link btn-danger"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteRowModal"
-                            >
-                              <i className="fa fa-times"></i> Xóa
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
+                      {sanP.map((item, key) =>(
+
+<tr key={key}>
+<td>{item.maSP}</td>
+<td>{item.tenSP}</td>
+<td>900</td>
+<td>{item.gia}đ</td>
+<td>23/07/2024</td>
+<td>
+  <div className="form-button-action">
+    <button
+      className="btn btn-link btn-primary btn-lg"
+      onClick={() => CtSP(item.maSP)}
+    >
+      <i className="fa fa-edit"></i> Sửa
+    </button>
+    <button
+      type="button"
+      className="btn btn-link btn-danger"
+      data-bs-toggle="modal"
+      data-bs-target="#deleteRowModal"
+    >
+      <i className="fa fa-times"></i> Xóa
+    </button>
+  </div>
+</td>
+</tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
