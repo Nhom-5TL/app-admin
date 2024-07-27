@@ -6,7 +6,7 @@ import { Modal } from "bootstrap";
 interface sanP {
   maSP: number;
   tenSP: string;
-  Anh: string;
+  hinhAnh: string;
   tenNhanHieu: string;
   maNhanHieu: number;
   tenLoai: string;
@@ -17,7 +17,7 @@ interface sanP {
   trangThai: number;
 }
 
-export const LinkImg = "https://localhost:7095/media/SanPham/"
+export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/"
 
 const Index = () => {
   const [sanP, setSPH] = useState<sanP[]>([]);
@@ -107,7 +107,7 @@ const Index = () => {
                           <td>{item.maSP}</td>
                           <td>
                             <img
-                              src={`${LinkImg}${item.Anh}`}
+                              src={`${LinkImg}${item.hinhAnh}`}
                               style={{ width: "100px", height: "100px" }}
                             />
                           </td>
