@@ -52,15 +52,15 @@ const CreateProduct: React.FC = () => {
 
       if (response.status === 201) {
         console.log("Product added successfully", response.data);
-        // Navigate back to the product list page
+
         navigate("/product");
       } else {
         console.error("Failed to add product", response);
-        // Handle error (e.g., show error message)
+
       }
     } catch (error) {
       console.error("Error adding product", error);
-      // Handle error (e.g., show error message)
+
     }
   };
 
