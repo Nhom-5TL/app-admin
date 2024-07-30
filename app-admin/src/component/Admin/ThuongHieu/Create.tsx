@@ -3,30 +3,30 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Create = () => {
-  const [productName, setProductName] = useState("");
+  const [thuongHieu, setThuongHieu] = useState("");
   const navigate = useNavigate();
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProductName(event.target.value);
+    setThuongHieu(event.target.value);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
-      const response = await axios.post("https://localhost:7095/api/loais", {
-        TenLoai: productName,
-      });
-      console.log("Loại sản phẩm mới được thêm:", response.data);
+      const response = await axios.post(
+        "https://localhost:7095/api/NhanHieux",
+        {
+          TenNhanHieu: thuongHieu,
+        }
+      );
 
-      alert("Loại sản phẩm đã được thêm thành công!");
-
-      navigate("/category");
+      console.log("Thêm thành công", response.data);
+      alert("Thêm thương hiệu thành công");
+      navigate("/ThuongHieu");
     } catch (error) {
-      console.error("Lỗi khi thêm loại sản phẩm:", error);
-      alert("Đã xảy ra lỗi khi thêm loại sản phẩm!");
+      console.error("Lỗi thêm thương hiệu", error);
     }
   };
-
   return (
     <div className="container mt-5" style={{ marginLeft: "15%" }}>
       <div className="row">
@@ -46,7 +46,7 @@ const Create = () => {
                             className="form-control"
                             id="productName"
                             placeholder="Nhập tên loại sản phẩm"
-                            value={productName}
+                            value={thuongHieu}
                             onChange={handleInputChange}
                           />
                         </div>
@@ -55,13 +55,13 @@ const Create = () => {
                           className="btn btn-primary btn-left"
                           style={{ marginLeft: "10px" }}
                         >
-                          Thêm loại sản phẩm
+                          Thêm thương hiệu
                         </button>
                         <button
                           type="button"
                           className="btn btn-warning"
                           style={{ marginLeft: "10px" }}
-                          onClick={() => navigate("/category")}
+                          onClick={() => navigate("/ThuongHieu")}
                         >
                           Trở lại
                         </button>

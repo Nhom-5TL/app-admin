@@ -28,7 +28,7 @@ const Header = () => {
                 <div className="collapse" id="base">
                   <ul className="nav nav-collapse">
                     <li>
-                      <a href="/admin/components/avatars">
+                      <a href="/ThuongHieu">
                         <span className="sub-item">Thương hiệu</span>
                       </a>
                     </li>

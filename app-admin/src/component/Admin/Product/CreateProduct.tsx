@@ -2,9 +2,8 @@ import React, { useEffect, useState, FormEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-interface sanP {
+interface SanP {
   tenSP: string;
-  Anh: string;
   tenNhanHieu: string;
   maNhanHieu: number;
   tenLoai: string;
@@ -12,8 +11,8 @@ interface sanP {
 }
 
 const CreateProduct: React.FC = () => {
-  const [sanLP, setSP] = useState<sanP[]>([]);
-  const [sanTH, setTH] = useState<sanP[]>([]);
+  const [sanLP, setSP] = useState<SanP[]>([]);
+  const [sanTH, setTH] = useState<SanP[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,27 +44,24 @@ const CreateProduct: React.FC = () => {
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
       if (response.status === 201) {
         console.log("Product added successfully", response.data);
-
         navigate("/product");
       } else {
         console.error("Failed to add product", response);
-
       }
     } catch (error) {
       console.error("Error adding product", error);
-
     }
   };
 
   return (
-    <div className="container mt-3">
+    <div className="container mt-5">
       <div className="row">
         <div className="col-md-10">
           <div className="container mt-5">
@@ -79,7 +75,8 @@ const CreateProduct: React.FC = () => {
                       type="file"
                       className="form-control-file"
                       id="productImage"
-                      name="hinhanhtailen"
+                      name="hinhAnhTaiLens"
+                      multiple
                     />
                   </div>
                   <div className="form-group">
@@ -118,9 +115,16 @@ const CreateProduct: React.FC = () => {
                   </div>
                   <div className="form-group">
                     <label htmlFor="brand">Thương hiệu</label>
-                    <select className="form-control" id="brand" name="maNhanHieu">
+                    <select
+                      className="form-control"
+                      id="brand"
+                      name="maNhanHieu"
+                    >
                       {sanTH.map((option) => (
-                        <option key={option.maNhanHieu} value={option.maNhanHieu}>
+                        <option
+                          key={option.maNhanHieu}
+                          value={option.maNhanHieu}
+                        >
                           {option.tenNhanHieu}
                         </option>
                       ))}
@@ -135,10 +139,7 @@ const CreateProduct: React.FC = () => {
                       placeholder="Nhập mô tả sản phẩm"
                     ></textarea>
                   </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                  >
+                  <button type="submit" className="btn btn-primary">
                     Thêm sản phẩm
                   </button>
                 </form>

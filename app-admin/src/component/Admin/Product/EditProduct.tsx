@@ -5,7 +5,6 @@ import axios from "axios";
 interface sanP {
   maSP: number;
   tenSP: string;
-  hinhAnh: string;
   tenNhanHieu: string;
   maNhanHieu: number;
   tenLoai: string;
@@ -71,15 +70,12 @@ const EditProduct: React.FC = () => {
 
       if (response.status === 200) {
         console.log("Product updated successfully:", response.data);
-       
         navigate("/product");
       } else {
         console.error("Failed to update product:", response);
-    
       }
     } catch (error) {
       console.error("Error updating product:", error);
-     
     }
   };
 
@@ -96,12 +92,15 @@ const EditProduct: React.FC = () => {
                     <div className="row">
                       <div className="col-md-6">
                         <div className="form-group">
-                          <label htmlFor="productImage">Hình ảnh sản phẩm</label>
+                          <label htmlFor="productImages">
+                            Hình ảnh sản phẩm
+                          </label>
                           <input
                             type="file"
                             className="form-control-file"
-                            id="productImage"
+                            id="productImages"
                             name="hinhanhtailen"
+                            multiple
                           />
                         </div>
                       </div>
@@ -152,7 +151,10 @@ const EditProduct: React.FC = () => {
                             defaultValue={sanP.maNhanHieu}
                           >
                             {sanTH.map((option) => (
-                              <option key={option.maNhanHieu} value={option.maNhanHieu}>
+                              <option
+                                key={option.maNhanHieu}
+                                value={option.maNhanHieu}
+                              >
                                 {option.tenNhanHieu}
                               </option>
                             ))}

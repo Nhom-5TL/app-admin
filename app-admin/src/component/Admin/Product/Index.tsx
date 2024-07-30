@@ -3,24 +3,18 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Modal } from "bootstrap";
 
-interface sanP {
+interface SanPhamDTO {
   maSP: number;
   tenSP: string;
-  hinhAnh: string;
-  tenNhanHieu: string;
-  maNhanHieu: number;
-  tenLoai: string;
-  moTa: string;
-  maLoai: number;
   gia: number;
-  htvc: number;
-  trangThai: number;
+  moTa: string;
+  tenHinhAnhDauTien: string;
 }
 
-export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/"
+export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/";
 
 const Index = () => {
-  const [sanP, setSPH] = useState<sanP[]>([]);
+  const [sanPhams, setSanPhams] = useState<SanPhamDTO[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const navigate = useNavigate();
 
@@ -29,7 +23,7 @@ const Index = () => {
       try {
         const response = await axios.get("https://localhost:7095/api/SanPhams");
         console.log("DỮ LIỆU:", response.data);
-        setSPH(response.data);
+        setSanPhams(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy sản phẩm:", error);
       }
@@ -40,7 +34,7 @@ const Index = () => {
 
   const CtSP = async (maSP: number) => {
     try {
-      const response = await axios.get<sanP>(
+      const response = await axios.get<SanPhamDTO>(
         `https://localhost:7095/api/SanPhams/${maSP}`
       );
       console.log("Dữ liệu phản hồi:", response.data);
@@ -54,7 +48,7 @@ const Index = () => {
     try {
       await axios.delete(`https://localhost:7095/api/SanPhams/${id}`);
 
-      setSPH(sanP.filter((item) => item.maSP !== id));
+      setSanPhams(sanPhams.filter((item) => item.maSP !== id));
 
       const modalElement = document.getElementById("deleteRowModal");
       if (modalElement) {
@@ -102,13 +96,14 @@ const Index = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {sanP.map((item) => (
+                      {sanPhams.map((item) => (
                         <tr key={item.maSP}>
                           <td>{item.maSP}</td>
                           <td>
                             <img
-                              src={`${LinkImg}${item.hinhAnh}`}
+                              src={`${LinkImg}${item.tenHinhAnhDauTien}`}
                               style={{ width: "100px", height: "100px" }}
+                              alt="Hình ảnh sản phẩm"
                             />
                           </td>
                           <td>{item.tenSP}</td>
