@@ -11,7 +11,7 @@ import UpdateCategory from "./component/Admin/Category/UpdateCategory";
 import ThuongHieu from "./component/Admin/ThuongHieu/Index";
 import CreateThuongHieu from "./component/Admin/ThuongHieu/Create";
 import UpdateThuongHieu from "./component/Admin/ThuongHieu/UpdateThuongHieu";
-
+import TaiKhoan from"./component/Admin/TaiKhoan/Load";
 import DonHang from "./component/Admin/Order/Index";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
@@ -61,6 +61,10 @@ const router = createBrowserRouter([
       {
         path: "/ThuongHieu/update/:MaThuongHieu",
         element: <UpdateThuongHieu />,
+      },
+      {
+        path: "/Load",
+        element: <TaiKhoan />,
       },
       {
         path: "/order",
