@@ -35,7 +35,7 @@ const Index = () => {
       const response = await axios.get<sanP[]>(`https://localhost:7095/api/SanPhams/${maSP}`);
       console.log('Response data:', response.data); // Kiểm tra dữ liệu trả về
       setSPH(response.data);
-      navigate(`./${maSP}`);
+      navigate(`/${maSP}`);
     } catch (error) {
       console.error('Error in CtWeb:', error);
     }
