@@ -16,10 +16,8 @@ const Create = () => {
       const response = await axios.post("https://localhost:7095/api/loais", {
         TenLoai: productName,
       });
-      console.log("Loại sản phẩm mới được thêm:", response.data);
-
-      alert("Loại sản phẩm đã được thêm thành công!");
-
+      console.log("Thêm thành công", response.data);
+      alert("Thêm thương hiệu thành công");
       navigate("/category");
     } catch (error) {
       console.error("Lỗi khi thêm loại sản phẩm:", error);
