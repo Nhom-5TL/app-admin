@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Modal } from "bootstrap";
+import { toast } from "react-toastify";
 
 interface SanPhamDTO {
   maSP: number;
@@ -54,9 +55,16 @@ const Index = () => {
       const modalElement = document.getElementById("deleteRowModal");
       if (modalElement) {
         const modal = Modal.getInstance(modalElement);
-        modal?.hide();
+        if (modal) {
+          modal.hide();
+        }
       }
-      navigate("/product");
+
+      toast.success("Xóa sản phẩm thành công!");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 5000);
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
     }

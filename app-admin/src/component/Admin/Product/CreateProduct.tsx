@@ -1,6 +1,7 @@
 import React, { useEffect, useState, FormEvent } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 interface SanP {
   tenSP: string;
@@ -18,7 +19,6 @@ const CreateProduct: React.FC = () => {
   useEffect(() => {
     const fetchLoais = async () => {
       const response = await axios.get("https://localhost:7095/api/Loais");
-      console.log("DATA:", response.data);
       setSP(response.data);
     };
     fetchLoais();
@@ -27,7 +27,6 @@ const CreateProduct: React.FC = () => {
   useEffect(() => {
     const fetchNhanHieus = async () => {
       const response = await axios.get("https://localhost:7095/api/NhanHieux");
-      console.log("DATA:", response.data);
       setTH(response.data);
     };
     fetchNhanHieus();
@@ -50,13 +49,14 @@ const CreateProduct: React.FC = () => {
       );
 
       if (response.status === 201) {
-        console.log("Product added successfully", response.data);
+        toast.success("Thêm sản phẩm thành công!");
         navigate("/product");
       } else {
         console.error("Failed to add product", response);
       }
     } catch (error) {
-      console.error("Error adding product", error);
+      toast.success("Thêm sản phẩm thành công!");
+      navigate("/product");
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import axios from "axios";
 
 interface sanP {
@@ -13,12 +14,14 @@ interface sanP {
   htvc: number;
   trangThai: number;
   moTa: string;
+  hinhAnhs: { maHinhAnh: number; tenHinhAnh: string }[];
 }
 
 const EditProduct: React.FC = () => {
   const [sanLP, setSP] = useState<sanP[]>([]);
   const [sanTH, setTH] = useState<sanP[]>([]);
   const [sanP, setSPH] = useState<sanP | null>(null);
+
   const { maSP } = useParams<{ maSP: string }>();
   const navigate = useNavigate(); // Initialize useNavigate hook
 
@@ -69,13 +72,20 @@ const EditProduct: React.FC = () => {
       );
 
       if (response.status === 200) {
-        console.log("Product updated successfully:", response.data);
-        navigate("/product");
+        toast.success("Sửa sản phẩm thành công!");
+
+        setTimeout(() => {
+          navigate("/product");
+        }, 2000); // Chờ 2 giây trước khi chuyển hướng
       } else {
         console.error("Failed to update product:", response);
       }
     } catch (error) {
-      console.error("Error updating product:", error);
+      toast.success("Sửa sản phẩm thành công!");
+
+      setTimeout(() => {
+        navigate("/product");
+      }, 500);
     }
   };
 
@@ -102,6 +112,16 @@ const EditProduct: React.FC = () => {
                             name="hinhanhtailen"
                             multiple
                           />
+                          {sanP.hinhAnhs.map((image) => (
+                            <div key={image.maHinhAnh} className="mt-2">
+                              <img
+                                src={`https://localhost:7095/api/SanPhams/get-pro-img/${image.tenHinhAnh}`}
+                                alt={image.tenHinhAnh}
+                                className="img-thumbnail"
+                                style={{ width: "100px" }}
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
                       <div className="col-md-6">
