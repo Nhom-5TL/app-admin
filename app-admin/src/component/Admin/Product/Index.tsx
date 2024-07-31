@@ -34,16 +34,11 @@ const Index = () => {
 
   const CtSP = async (maSP: number) => {
     try {
-<<<<<<< HEAD
-      const response = await axios.get<sanP[]>(`https://localhost:7095/api/SanPhams/${maSP}`);
-      console.log('Response data:', response.data); // Kiểm tra dữ liệu trả về
-      setSPH(response.data);
-=======
       const response = await axios.get<SanPhamDTO>(
         `https://localhost:7095/api/SanPhams/${maSP}`
       );
       console.log("Dữ liệu phản hồi:", response.data);
->>>>>>> 86912375a0d9673fc80545069d17d35dc98ca260
+
       navigate(`/${maSP}`);
     } catch (error) {
       console.error("Lỗi trong CtWeb:", error);
