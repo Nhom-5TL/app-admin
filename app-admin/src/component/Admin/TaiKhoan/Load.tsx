@@ -46,11 +46,12 @@ const Load = () =>{
 
   const deleteProduct = async (maKH: number) => {
     try {
-      await axios.delete(`https://localhost:7095/api/KhachHangs/${maKH}`);
-
-      setSanPhams(sanPhams.filter((item) => item.maKH !== maKH));
-      alert(`Bạn muốn xóa khách hàng này không?`)
-      navigate("/load");
+      const confirmDelete = window.confirm("Bạn muốn xóa khách hàng này không?");
+      if (confirmDelete) {
+        await axios.delete(`https://localhost:7095/api/KhachHangs/${maKH}`);
+        setSanPhams(sanPhams.filter((item) => item.maKH !== maKH));
+        navigate("/load");
+      }
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
     }
