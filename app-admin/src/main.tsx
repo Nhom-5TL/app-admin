@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import Home from "./component/Admin/Home/Index";
 import Product from "./component/Admin/Product/Index";
 import CreateProduct from "./component/Admin/Product/CreateProduct";
 import EditProduct from "./component/Admin/Product/EditProduct";
@@ -13,6 +12,8 @@ import ThuongHieu from "./component/Admin/ThuongHieu/Index";
 import CreateThuongHieu from "./component/Admin/ThuongHieu/Create";
 import UpdateThuongHieu from "./component/Admin/ThuongHieu/UpdateThuongHieu";
 
+import DonHang from "./component/Admin/Order/Index";
+
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./component/Layout";
 
@@ -23,7 +24,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: <Product />,
       },
       {
         path: "/product",
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
       {
         path: "/ThuongHieu/update/:MaThuongHieu",
         element: <UpdateThuongHieu />,
+      },
+      {
+        path: "/order",
+        element: <DonHang />,
       },
     ],
   },

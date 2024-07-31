@@ -45,6 +45,13 @@ const Header = () => {
                   </ul>
                 </div>
               </li>
+
+              <li className="nav-item active">
+                <a href="/order">
+                  <i className="fas fa-money-check"></i>
+                  <p>Đơn hàng</p>
+                </a>
+              </li>
             </ul>
           </div>
         </div>
