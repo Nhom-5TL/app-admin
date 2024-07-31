@@ -2,24 +2,26 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-interface SanPhamDTO {
-  maSP: number;
-  tenSP: string;
-  gia: number;
-  moTa: string;
-  tenHinhAnhDauTien: string;
+interface TaiKhoan {
+  maKH: number,
+    tenKh: string,
+    email: string,
+    sdt: string,
+    cccd: string,
+    tenTaiKhoan: string,
+    matKhau: string,
+    trangThai: string
 }
 
 export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/";
 const Load = () =>{
-    const [sanPhams, setSanPhams] = useState<SanPhamDTO[]>([]);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [sanPhams, setSanPhams] = useState<TaiKhoan[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("https://localhost:7095/api/SanPhams");
+        const response = await axios.get("https://localhost:7095/api/KhachHangs");
         console.log("DỮ LIỆU:", response.data);
         setSanPhams(response.data);
       } catch (error) {
@@ -30,25 +32,26 @@ const Load = () =>{
     fetchProducts();
   }, []);
 
-  const CtSP = async (maSP: number) => {
+  // const CtSP = async (maKH: number) => {
+  //   try {
+  //     const response = await axios.get<TaiKhoan>(
+  //       `https://localhost:7095/api/SanPhams/${maKH}`
+  //     );
+  //     console.log("Dữ liệu phản hồi:", response.data);
+  //     navigate(`/${maKH}`);
+  //   } catch (error) {
+  //     console.error("Lỗi trong CtWeb:", error);
+  //   }
+  // };
+
+  const deleteProduct = async (maKH: number) => {
     try {
-      const response = await axios.get<SanPhamDTO>(
-        `https://localhost:7095/api/SanPhams/${maSP}`
-      );
-      console.log("Dữ liệu phản hồi:", response.data);
-      navigate(`/${maSP}`);
-    } catch (error) {
-      console.error("Lỗi trong CtWeb:", error);
-    }
-  };
-
-  const deleteProduct = async (id: number) => {
-    try {
-      await axios.delete(`https://localhost:7095/api/SanPhams/${id}`);
-
-      setSanPhams(sanPhams.filter((item) => item.maSP !== id));
-
-      navigate("/product");
+      const confirmDelete = window.confirm("Bạn muốn xóa khách hàng này không?");
+      if (confirmDelete) {
+        await axios.delete(`https://localhost:7095/api/KhachHangs/${maKH}`);
+        setSanPhams(sanPhams.filter((item) => item.maKH !== maKH));
+        navigate("/load");
+      }
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
     }
@@ -63,13 +66,8 @@ return  (
             <div className="card">
               <div className="card-header">
                 <div className="d-flex align-items-center">
-                  <h4 className="card-title">Sản phẩm</h4>
-                  <a
-                    className="btn btn-primary btn-round ms-auto"
-                    href="/product/create"
-                  >
-                    <i className="fa fa-plus"></i> Thêm sản phẩm
-                  </a>
+                  <h4 className="card-title">Tài khoản</h4>
+                  
                 </div>
               </div>
               <div className="card-body">
@@ -81,54 +79,62 @@ return  (
                     <thead>
                       <tr>
                         <th>#</th>
-                        <th>Hình</th>
-                        <th>Tên sản phẩm</th>
-                        <th>Giá</th>
-                        <th>Mô tả</th>
+                        <th>Tên Khách Hàng</th>
+                        <th>Số Điện Thoại</th>
+                        <th>CCCD</th>
+                        <th>Tên Đăng Nhập</th>
+                        <th>Mật Khẩu</th>
+                        <th>Trạng Thái</th>
                         <th className="width: 10%">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sanPhams.map((item) => (
-                        <tr key={item.maSP}>
-                          <td>{item.maSP}</td>
-                          <td>
+                        <tr key={item.maKH}>
+                          <td>{item.maKH}</td>
+                          {/* <td>
                             <img
                               src={`${LinkImg}${item.tenHinhAnhDauTien}`}
                               style={{ width: "100px", height: "100px" }}
                               alt="Hình ảnh sản phẩm"
                             />
-                          </td>
-                          <td>{item.tenSP}</td>
-                          <td>{item.gia}đ</td>
-                          <td>{item.moTa}</td>
+                          </td> */}
+                          <td>{item.tenKh}</td>
+                          <td>{item.sdt}</td>
+                          <td>{item.cccd}</td>
+                          <td>{item.tenTaiKhoan}</td>
+                          <td>{item.matKhau}</td>
+                          <td>{item.trangThai}</td>
                           <td>
                             <div className="form-button-action">
                               <button
                                 className="btn btn-link btn-primary btn-lg"
-                                onClick={() => CtSP(item.maSP)}
+                                // onClick={() => CtSP(item.maKH)}
                               >
-                                <i className="fa fa-edit"></i> Sửa
+                                <i className="fa fa-edit"></i> Khóa Tài Khoản
                               </button>
                               <button
-                                type="button"
+                                type="submit"
                                 className="btn btn-link btn-danger"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteRowModal"
-                                onClick={() => setSelectedId(item.maSP)}
+                                onClick={() => {
+                                    deleteProduct(item.maKH);
+                                  
+                                }}
                               >
                                 <i className="fa fa-times"></i> Xóa
                               </button>
                             </div>
                           </td>
+                          
                         </tr>
+                        
                       ))}
                     </tbody>
                   </table>
                 </div>
 
                 {/* Modal Xóa */}
-                <div
+                {/* <div
                   className="modal fade"
                   id="deleteRowModal"
                   role="dialog"
@@ -151,11 +157,11 @@ return  (
                         </button>
                       </div>
                       <div className="modal-body">
-                        <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+                        <p>Bạn có chắc chắn muốn xóa khách hàng này?</p>
                       </div>
                       <div className="modal-footer border-0">
                         <button
-                          type="button"
+                          type="submit"
                           className="btn btn-primary"
                           onClick={() => {
                             if (selectedId !== null) {
@@ -175,7 +181,7 @@ return  (
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
