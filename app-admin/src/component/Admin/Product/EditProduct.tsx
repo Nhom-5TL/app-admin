@@ -1,237 +1,170 @@
-import React , {useEffect, useState, FormEvent }from "react";
+import React, { useEffect, useState, FormEvent } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-import {useParams } from 'react-router-dom';
-import axios from 'axios'
 interface sanP {
   maSP: number;
   tenSP: string;
-  Anh: string;
   tenNhanHieu: string;
   maNhanHieu: number;
   tenLoai: string;
   maLoai: number;
   gia: number;
-  htvc: number,
-  trangThai: number,
-  moTa: string
+  htvc: number;
+  trangThai: number;
+  moTa: string;
 }
-const EditProduct: React.FC = () => {
 
+const EditProduct: React.FC = () => {
   const [sanLP, setSP] = useState<sanP[]>([]);
   const [sanTH, setTH] = useState<sanP[]>([]);
-  const [sanP, setSPH] = useState<sanP | null >(null);
-  const {maSP} = useParams<{ maSP: string }>();
-  // const navigate = useNavigate();
-  useEffect(() => {
-    const fetchUsers = async () => {
-        const response = await axios.get<sanP[]>(
-          "https://localhost:7095/api/Loais"
-        );
-        console.log("DATA:", response.data);
+  const [sanP, setSPH] = useState<sanP | null>(null);
+  const { maSP } = useParams<{ maSP: string }>();
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
-          setSP(response.data);
+  useEffect(() => {
+    const fetchLoais = async () => {
+      const response = await axios.get<sanP[]>(
+        "https://localhost:7095/api/Loais"
+      );
+      setSP(response.data);
     };
 
-    fetchUsers();
+    const fetchNhanHieus = async () => {
+      const response = await axios.get<sanP[]>(
+        "https://localhost:7095/api/NhanHieux"
+      );
+      setTH(response.data);
+    };
+
+    fetchLoais();
+    fetchNhanHieus();
   }, []);
-  useEffect(() => {
-    const fetchUsers = async () => {
-        const response = await axios.get<sanP[]>(
-          "https://localhost:7095/api/NhanHieux"
-        );
-        console.log("DATA:", response.data);
 
-        setTH(response.data);
+  useEffect(() => {
+    const fetchSanPham = async () => {
+      const response = await axios.get<sanP>(
+        `https://localhost:7095/api/SanPhams/${maSP}`
+      );
+      setSPH(response.data);
     };
 
-    fetchUsers();
-  }, []);
-  useEffect(() => {
-    const fetchUsers = async () => {
-        const response = await axios.get<sanP>(
-          `https://localhost:7095/api/SanPhams/${maSP}`
-        );
-        console.log("DATA:", response.data);
-
-        setSPH(response.data);
-    };
-
-    fetchUsers();
+    fetchSanPham();
   }, [maSP]);
-  const AddSP = async (event: FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const form = event.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
 
-    const hinhAnh = (form.elements.namedItem("productImage") as HTMLInputElement).value;
-    const tenSP = (form.elements.namedItem("productName") as HTMLInputElement).value;
-    // const soLuong = (form.elements.namedItem("quantity") as HTMLInputElement).value;
-    const gia = (form.elements.namedItem("price") as HTMLInputElement)
-      .value;
-    const maLoai = (form.elements.namedItem("maLoai") as HTMLInputElement).value;
-    const htvc = (form.elements.namedItem("htvc") as HTMLInputElement).value;
-    const maNhanHieu = (form.elements.namedItem("maTH") as HTMLInputElement)
-      .value;
-      const trangThai = (form.elements.namedItem("Thai") as HTMLInputElement).value;
-      const moTa = (form.elements.namedItem("moTa") as HTMLInputElement)
-      .value;
-console.log(
-  tenSP,
-  moTa,
- gia,
- htvc,
- trangThai,
- maLoai ,
- maNhanHieu,
- hinhAnh,
-)
-const SanPham = {
-  maSP,
-  tenSP ,
-  moTa,
- gia,
- htvc,
- trangThai,
- maLoai ,
- maNhanHieu,
- hinhAnh
-} 
-const response = await axios.put(
-  "https://localhost:7095/api/SanPhams",
-  SanPham
-);
-if (response.status === 200) {
-  return response.data;
-}
+    try {
+      const response = await axios.put(
+        `https://localhost:7095/api/SanPhams/${maSP}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
+      if (response.status === 200) {
+        console.log("Product updated successfully:", response.data);
+        navigate("/product");
+      } else {
+        console.error("Failed to update product:", response);
+      }
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
+  };
 
-    };
   return (
-    
-
-      <div className="container mt-3">
+    <div className="container mt-3">
       <div className="row">
         <div className="col-md-10">
           <div className="container mt-5">
             <div className="card">
-              <div className="card-header"></div>
-
+              <div className="card-header">Chỉnh sửa sản phẩm</div>
               <div className="card-body">
-                <div className="container mt-5">
                 {sanP && (
-                  <form onSubmit={AddSP}>
+                  <form onSubmit={handleSubmit}>
                     <div className="row">
                       <div className="col-md-6">
                         <div className="form-group">
-                          <label htmlFor="productImage">
+                          <label htmlFor="productImages">
                             Hình ảnh sản phẩm
                           </label>
                           <input
                             type="file"
                             className="form-control-file"
-                            id="productImage"
-                            defaultValue={sanP.Anh}
-                            name="productImage"
+                            id="productImages"
+                            name="hinhanhtailen"
                             multiple
                           />
                         </div>
                       </div>
                       <div className="col-md-6">
                         <div className="form-group">
-                          <label htmlFor="productName">Tên sản phẩm</label>
+                          <label htmlFor="tenSP">Tên sản phẩm</label>
                           <input
                             type="text"
                             className="form-control"
-                            id="productName"
+                            id="tenSP"
                             defaultValue={sanP.tenSP}
-                            name="productName"
+                            name="tenSP"
                             placeholder="Nhập tên sản phẩm"
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="quantity">Số lượng</label>
-                          <input
-                            type="number"
-                            className="form-control"
-                            id="quantity"
-                            //   value={quantity}
-                            //   onChange={(e) => setQuantity(e.target.value)}
-                            placeholder="Nhập số lượng"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="price">Giá</label>
+                          <label htmlFor="gia">Giá</label>
                           <input
                             type="text"
                             className="form-control"
-                            id="price"
+                            id="gia"
                             defaultValue={sanP.gia}
-                            name="price"
+                            name="gia"
                             placeholder="Nhập giá"
                           />
                         </div>
                         <div className="form-group">
-                          <label htmlFor="category">Loại sản phẩm</label>
-                          <select className="form-control" id="category" name="maLoai">
-                          {/* <option value="">Chọn loại sản phẩm</option>
-                          <option value="category1">Loại 1</option>
-                          <option value="category2">Loại 2</option> */}
-                          {sanLP.map((option) => (
-            <option key={option.maLoai} value={option.maLoai}>
-              {option.tenLoai}
-            </option>
-          ))}
-                        </select>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="brand">Thương hiệu</label>
-                          <select className="form-control" id="brand" name="maTH">
-                        {sanTH.map((option) => (
-            <option key={option.maNhanHieu} value={option.maNhanHieu}>
-              {option.tenNhanHieu}
-            </option>
-          ))}
-                          {/* <option value="">Chọn thương hiệu</option>
-                          <option value="brand1">Thương hiệu 1</option>
-                          <option value="brand2">Thương hiệu 2</option> */}
-                        </select>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="color">Màu</label>
-                          <select className="form-control" id="color">
-                            <option value="">Chọn màu</option>
-                            <option value="red">Đỏ</option>
-                            <option value="blue">Xanh</option>
-                            {/* Thêm các tùy chọn khác */}
+                          <label htmlFor="maLoai">Loại sản phẩm</label>
+                          <select
+                            className="form-control"
+                            id="maLoai"
+                            name="maLoai"
+                            defaultValue={sanP.maLoai}
+                          >
+                            {sanLP.map((option) => (
+                              <option key={option.maLoai} value={option.maLoai}>
+                                {option.tenLoai}
+                              </option>
+                            ))}
                           </select>
                         </div>
                         <div className="form-group">
-                        <label>HTVC</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="htvc"
-                          name="htvc"
-                          defaultValue={sanP.htvc}
-                          placeholder="Nhập giá"
-                        />
-                      </div>
-                      <div className="form-group">
-                        <label>Trạng Thái</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="Thai"
-                          name="Thai"
-                          defaultValue={sanP.trangThai}
-                          placeholder="Nhập giá"
-                        />
-                      </div>
+                          <label htmlFor="maNhanHieu">Thương hiệu</label>
+                          <select
+                            className="form-control"
+                            id="maNhanHieu"
+                            name="maNhanHieu"
+                            defaultValue={sanP.maNhanHieu}
+                          >
+                            {sanTH.map((option) => (
+                              <option
+                                key={option.maNhanHieu}
+                                value={option.maNhanHieu}
+                              >
+                                {option.tenNhanHieu}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <div className="form-group">
-                          <label htmlFor="description">Mô tả</label>
+                          <label htmlFor="moTa">Mô tả</label>
                           <textarea
                             className="form-control"
-                            id="description"
+                            id="moTa"
                             name="moTa"
                             defaultValue={sanP.moTa}
                             placeholder="Nhập mô tả sản phẩm"
@@ -243,9 +176,7 @@ if (response.status === 200) {
                       </div>
                     </div>
                   </form>
-                  
-    )}
-                </div>
+                )}
               </div>
             </div>
           </div>

@@ -1,56 +1,82 @@
-import React , {useEffect, useState }from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Modal } from "bootstrap";
 
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios'
-interface sanP {
+interface SanPhamDTO {
   maSP: number;
   tenSP: string;
-  Anh: string;
-  tenNhanHieu: string;
-  maNhanHieu: number;
-  tenLoai: string;
-  maLoai: number;
   gia: number;
-  htvc: number,
-  trangThai: number,
+  moTa: string;
+  tenHinhAnhDauTien: string;
 }
-const Index = () => {
-  const [sanP, setSPH] = useState<sanP[]>([]);
-  const navigate = useNavigate();
-  useEffect(() => {
-    const fetchUsers = async () => {
-        const response = await axios.get(
-          "https://localhost:7095/api/SanPhams"
-        );
-        console.log("DATA:", response.data);
 
-        setSPH(response.data);
+export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/";
+
+const Index = () => {
+  const [sanPhams, setSanPhams] = useState<SanPhamDTO[]>([]);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get("https://localhost:7095/api/SanPhams");
+        console.log("DỮ LIỆU:", response.data);
+        setSanPhams(response.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy sản phẩm:", error);
+      }
     };
 
-    fetchUsers();
+    fetchProducts();
   }, []);
 
   const CtSP = async (maSP: number) => {
     try {
+<<<<<<< HEAD
       const response = await axios.get<sanP[]>(`https://localhost:7095/api/SanPhams/${maSP}`);
       console.log('Response data:', response.data); // Kiểm tra dữ liệu trả về
       setSPH(response.data);
+=======
+      const response = await axios.get<SanPhamDTO>(
+        `https://localhost:7095/api/SanPhams/${maSP}`
+      );
+      console.log("Dữ liệu phản hồi:", response.data);
+>>>>>>> 86912375a0d9673fc80545069d17d35dc98ca260
       navigate(`/${maSP}`);
     } catch (error) {
-      console.error('Error in CtWeb:', error);
+      console.error("Lỗi trong CtWeb:", error);
     }
   };
+
+  const deleteProduct = async (id: number) => {
+    try {
+      await axios.delete(`https://localhost:7095/api/SanPhams/${id}`);
+
+      setSanPhams(sanPhams.filter((item) => item.maSP !== id));
+
+      const modalElement = document.getElementById("deleteRowModal");
+      if (modalElement) {
+        const modal = Modal.getInstance(modalElement);
+        modal?.hide();
+      }
+      navigate("/product");
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+    }
+  };
+
   return (
-  
     <div className="container">
       <div className="page-inner">
         <div className="page-header"></div>
         <div className="row">
-          <div >
+          <div>
             <div className="card">
               <div className="card-header">
                 <div className="d-flex align-items-center">
-                  <h4 className="card-title">Sản phẩm </h4>
+                  <h4 className="card-title">Sản phẩm</h4>
                   <a
                     className="btn btn-primary btn-round ms-auto"
                     href="/product/create"
@@ -68,49 +94,53 @@ const Index = () => {
                     <thead>
                       <tr>
                         <th>#</th>
-                        <th>Hinh</th>
+                        <th>Hình</th>
                         <th>Tên sản phẩm</th>
-                        <th>Số lượng</th>
                         <th>Giá</th>
-                        <th>Ngày tạo</th>
-
+                        <th>Mô tả</th>
                         <th className="width: 10%">Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {sanP.map((item, key) =>(
-
-<tr key={key}>
-<td>{item.maSP}</td>
-<td>{item.tenSP}</td>
-<td>900</td>
-<td>{item.gia}đ</td>
-<td>23/07/2024</td>
-<td>
-  <div className="form-button-action">
-    <button
-      className="btn btn-link btn-primary btn-lg"
-      onClick={() => CtSP(item.maSP)}
-    >
-      <i className="fa fa-edit"></i> Sửa
-    </button>
-    <button
-      type="button"
-      className="btn btn-link btn-danger"
-      data-bs-toggle="modal"
-      data-bs-target="#deleteRowModal"
-    >
-      <i className="fa fa-times"></i> Xóa
-    </button>
-  </div>
-</td>
-</tr>
+                      {sanPhams.map((item) => (
+                        <tr key={item.maSP}>
+                          <td>{item.maSP}</td>
+                          <td>
+                            <img
+                              src={`${LinkImg}${item.tenHinhAnhDauTien}`}
+                              style={{ width: "100px", height: "100px" }}
+                              alt="Hình ảnh sản phẩm"
+                            />
+                          </td>
+                          <td>{item.tenSP}</td>
+                          <td>{item.gia}đ</td>
+                          <td>{item.moTa}</td>
+                          <td>
+                            <div className="form-button-action">
+                              <button
+                                className="btn btn-link btn-primary btn-lg"
+                                onClick={() => CtSP(item.maSP)}
+                              >
+                                <i className="fa fa-edit"></i> Sửa
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-link btn-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteRowModal"
+                                onClick={() => setSelectedId(item.maSP)}
+                              >
+                                <i className="fa fa-times"></i> Xóa
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                {/* <!-- Delete Modal --> */}
+                {/* Modal Xóa */}
                 <div
                   className="modal fade"
                   id="deleteRowModal"
@@ -134,22 +164,27 @@ const Index = () => {
                         </button>
                       </div>
                       <div className="modal-body">
-                        <form asp-action="Delete" method="post">
-                          <input type="hidden" id="deleteId" name="id" />
-                          <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
-                          <div className="modal-footer border-0">
-                            <button type="submit" className="btn btn-primary">
-                              Xóa
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-danger"
-                              data-bs-dismiss="modal"
-                            >
-                              Đóng
-                            </button>
-                          </div>
-                        </form>
+                        <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
+                      </div>
+                      <div className="modal-footer border-0">
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={() => {
+                            if (selectedId !== null) {
+                              deleteProduct(selectedId);
+                            }
+                          }}
+                        >
+                          Xóa
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          data-bs-dismiss="modal"
+                        >
+                          Đóng
+                        </button>
                       </div>
                     </div>
                   </div>

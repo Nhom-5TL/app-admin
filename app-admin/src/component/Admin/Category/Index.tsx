@@ -1,8 +1,52 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+
+interface Category {
+  maLoai: number;
+  tenLoai: string;
+}
 
 const Index = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get<Category[]>("https://localhost:7095/api/loais");
+      setCategories(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách loại sản phẩm:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleDelete = async (id: number) => {
+    // Hiển thị thông báo xác nhận
+    const confirmDelete = window.confirm("Bạn chắc chắn muốn xóa loại sản phẩm này không?");
+    
+    if (confirmDelete) {
+      try {
+        await axios.delete(`https://localhost:7095/api/loais/${id}`);
+        // Cập nhật danh sách sau khi xóa
+        setCategories(categories.filter(category => category.maLoai !== id));
+      } catch (error) {
+        console.error("Lỗi khi xóa loại sản phẩm:", error);
+      }
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
-<div className="container mt-50" >
+    <div className="container mt-50">
       <div className="page-inner">
         <div className="page-header"></div>
         <div className="row">
@@ -10,103 +54,41 @@ const Index = () => {
             <div className="card">
               <div className="card-header">
                 <div className="d-flex align-items-center">
-                  <h4 className="card-title">Loại sản phẩm </h4>
-                  <a
-                    className="btn btn-primary btn-round ms-auto"
-                    href='/category/create'
-                  >
+                  <h4 className="card-title">Loại sản phẩm</h4>
+                  <Link className="btn btn-primary btn-round ms-auto" to="/category/create">
                     <i className="fa fa-plus"></i> Thêm loại sản phẩm
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className="card-body">
                 <div className="table-responsive">
-                  <table
-                    id="add-row"
-                    className="display table table-striped table-hover"
-                  >
+                  <table id="add-row" className="display table table-striped table-hover">
                     <thead>
                       <tr>
-                        <th>#</th>
                         <th>Tên loại</th>
-                        <th>Ngày tạo</th>
-
-                        <th className="width: 10%">Thao tác</th>
+                        <th>Thao tác</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>12</td>
-                        <td>Gucci</td>
-
-                        <td>23/07/2024</td>
-                        <td>
-                          <div className="form-button-action">
-                            <a
-                              href='category/update'
-                              className="btn btn-link btn-primary btn-lg"
-                             
-                            >
+                      {categories.map(category => (
+                        <tr key={category.maLoai}>
+                          <td>{category.tenLoai}</td>
+                          <td>
+                            <Link to={`/category/update/${category.maLoai}`} className="btn btn-link btn-primary btn-lg">
                               <i className="fa fa-edit"></i>
-                            </a>
+                            </Link>
                             <button
                               type="button"
                               className="btn btn-link btn-danger"
-                              data-bs-toggle="modal"
-                              data-bs-target="#deleteRowModal"
+                              onClick={() => handleDelete(category.maLoai)}
                             >
-                              <i className="fa fa-times"></i> 
+                              <i className="fa fa-times"></i>
                             </button>
-                          </div>
-                        </td>
-                      </tr>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
-                </div>
-
-                {/* <!-- Delete Modal --> */}
-                <div
-                  className="modal fade"
-                  id="deleteRowModal"
-                  role="dialog"
-                  aria-hidden="true"
-                >
-                  <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                      <div className="modal-header border-0">
-                        <h5 className="modal-title">
-                          <span className="fw-mediumbold"> Xóa</span>
-                          <span className="fw-light"> loại sản phẩm</span>
-                        </h5>
-                        <button
-                          type="button"
-                          className="close"
-                          data-bs-dismiss="modal"
-                          aria-label="Close"
-                        >
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div className="modal-body">
-                        <form asp-action="Delete" method="post">
-                          <input type="hidden" id="deleteId" name="id" />
-                          <p>Bạn có chắc chắn muốn xóa sản phẩm này?</p>
-                          <div className="modal-footer border-0">
-                            <button type="submit" className="btn btn-primary">
-                              Xóa
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-danger"
-                              data-bs-dismiss="modal"
-                            >
-                              Đóng
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -114,7 +96,7 @@ const Index = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;

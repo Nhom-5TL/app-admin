@@ -2,43 +2,45 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const UpdateCategory = () => {
-  const { MaLoai } = useParams<{ MaLoai: string }>();
-  const [productName, setProductName] = useState("");
-  const [loading, setLoading] = useState(true);
+const UpdateThuongHieu = () => {
+  const { MaThuongHieu } = useParams<{ MaThuongHieu: string }>();
+  const [ThuongHieu, setThuongHieu] = useState("");
+  const [Loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchThuongHieu = async () => {
       try {
-        const response = await axios.get(`https://localhost:7095/api/loais/${MaLoai}`);
-        console.log("Dữ liệu trả về từ API:", response.data); // Kiểm tra dữ liệu
-        setProductName(response.data.tenLoai);
+        const response = await axios.get(
+          `https://localhost:7095/api/NhanHieux/${MaThuongHieu}`
+        );
+        console.log("Trả về api: ", response.data);
+        setThuongHieu(response.data.tenNhanHieu);
         setLoading(false);
       } catch (error) {
-        console.error("Lỗi khi lấy loại sản phẩm:", error);
+        console.log("Lỗi không sửa được: ", error);
         setLoading(false);
       }
     };
 
-    fetchCategory();
-  }, [MaLoai]);
+    fetchThuongHieu();
+  }, [MaThuongHieu]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     try {
-      await axios.put(`https://localhost:7095/api/loais/${MaLoai}`, {
-        maLoai: MaLoai,
-        tenLoai: productName,
+      await axios.put(`https://localhost:7095/api/NhanHieux/${MaThuongHieu}`, {
+        maNhanHieu: MaThuongHieu,
+        tenNhanHieu: ThuongHieu,
       });
-      navigate("/category");
+      navigate("/ThuongHieu");
     } catch (error) {
-      console.error("Lỗi khi sửa loại sản phẩm:", error);
+      console.error("Lỗi khi sửa thương hiệu:", error);
     }
   };
 
-  if (loading) {
+  if (Loading) {
     return <div>Loading...</div>;
   }
 
@@ -48,20 +50,19 @@ const UpdateCategory = () => {
         <div className="col-md-10">
           <div className="container mt-5">
             <div className="card">
-              <div className="card-header">Sửa loại sản phẩm</div>
-
+              <div className="card-header">Sửa thương hiệu</div>
               <div className="card-body">
                 <div className="container mt-5">
                   <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                      <label htmlFor="productName">Tên loại sản phẩm</label>
+                      <label htmlFor="productName">Tên thương hiệu</label>
                       <input
                         type="text"
                         className="form-control"
                         id="productName"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        placeholder="Nhập tên sản phẩm"
+                        value={ThuongHieu}
+                        onChange={(e) => setThuongHieu(e.target.value)}
+                        placeholder="Nhập tên thương hiệu"
                         required
                       />
                     </div>
@@ -79,4 +80,4 @@ const UpdateCategory = () => {
   );
 };
 
-export default UpdateCategory;
+export default UpdateThuongHieu;
