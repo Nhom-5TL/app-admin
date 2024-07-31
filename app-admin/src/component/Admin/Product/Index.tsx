@@ -38,6 +38,7 @@ const Index = () => {
         `https://localhost:7095/api/SanPhams/${maSP}`
       );
       console.log("Dữ liệu phản hồi:", response.data);
+
       navigate(`/${maSP}`);
     } catch (error) {
       console.error("Lỗi trong CtWeb:", error);

@@ -4,19 +4,17 @@ import Header from "./Admin/Header";
 import { Outlet } from "react-router-dom";
 
 const Layout = () => {
+  
   return (
     <>
       <div className="row">
-        <div className="col-lg-3">
+        <div className="col-md-2">
           <Header />
         </div>
-        <div className="col-lg-9">
+        <div className="col-md-10">
           <Outlet />
-       
         </div>
       </div>
-
-    
     </>
   );
 };
