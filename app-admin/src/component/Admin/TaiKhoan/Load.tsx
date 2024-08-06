@@ -56,6 +56,32 @@ const Load = () =>{
       console.error("Lỗi khi xóa sản phẩm:", error);
     }
   };
+  const KhTK = async (maKH: number) => {
+    try {
+      const confirmDelete = window.confirm("Bạn muốn khóa khách hàng này không?");
+      if (confirmDelete) {
+        await axios.put(`https://localhost:7095/api/KhachHangs/KhoaTK?id=${maKH}`);
+        setSanPhams(sanPhams.filter((item) => item.maKH !== maKH));
+        // navigate("/load");
+        window.location.href = "/load";
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+    }
+  };
+  const MoTK = async (maKH: number) => {
+    try {
+      const confirmDelete = window.confirm("Bạn muốn mở khóa khách hàng này không?");
+      if (confirmDelete) {
+        await axios.put(`https://localhost:7095/api/KhachHangs/MoTK?id=${maKH}`);
+        setSanPhams(sanPhams.filter((item) => item.maKH !== maKH));
+        // navigate("/load");
+        window.location.href = "/load";
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+    }
+  };
 return  (
     <>
     <div className="container">
@@ -107,12 +133,23 @@ return  (
                           <td>{item.trangThai}</td>
                           <td>
                             <div className="form-button-action">
-                              <button
+                              {item.trangThai == "online" ? (
+                                <button
                                 className="btn btn-link btn-primary btn-lg"
-                                // onClick={() => CtSP(item.maKH)}
+                                onClick={() => KhTK(item.maKH)}
                               >
                                 <i className="fa fa-edit"></i> Khóa Tài Khoản
                               </button>
+                              ): (
+<button
+                                className="btn btn-link btn-primary btn-lg"
+                                onClick={() => MoTK(item.maKH)}
+                              >
+                                <i className="fa fa-edit"></i> Mở Tài Khoản
+                              </button>
+                              )}
+                              
+                              
                               <button
                                 type="submit"
                                 className="btn btn-link btn-danger"
