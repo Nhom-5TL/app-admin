@@ -15,6 +15,7 @@ import CreateThuongHieu from "./component/Admin/ThuongHieu/Create";
 import UpdateThuongHieu from "./component/Admin/ThuongHieu/UpdateThuongHieu";
 import DonHang from "./component/Admin/Order/Index";
 import Layout from "./component/Layout";
+import TK from './component/Admin/TaiKhoan/Load'
 
 const router = createBrowserRouter([
   {
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
         path: "/ThuongHieu/update/:MaThuongHieu",
         element: <UpdateThuongHieu />,
       },
+      { path: "/load", element: <TK /> },
       { path: "/order", element: <DonHang /> },
     ],
   },
