@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface NhanHieu {
   maNhanHieu: number;
@@ -39,8 +41,10 @@ const Index = () => {
         setThuongHieu(
           ThuongHieus.filter((thuongHieu) => thuongHieu.maNhanHieu !== id)
         );
+        toast.success("Xóa nhãn hiệu thành công!");
       } catch (error) {
         console.error("Lỗi khi xóa loại sản phẩm:", error);
+        toast.error("Lỗi khi xóa nhãn hiệu!");
       }
     }
   };
