@@ -1,38 +1,176 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-interface DonHang {
-  MaDH: number;
-  TenKh: string;
-  NgayTao: string;
-  TrangThai: number;
+interface ChiTietDonHang {
+  maCTDH: number;
+  maDH: number;
+  maSP: number;
+  sanPham: {
+    maSP: number;
+    tenSP: string;
+    moTa: string;
+    gia: number;
+    htvc: number;
+    trangThai: number;
+    maLoai: number;
+    maNhanHieu: number;
+    hinhAnhs: Array<{
+      maHinhAnh: number;
+      tenHinhAnh: string;
+      maSanPham: number;
+    }>;
+  };
+  soLuong: number;
+  donGia: number;
+  tenSP: string;
+  maMauSac: number;
+  maKichThuoc: number;
+}
+
+interface Order {
+  maDH: number;
+  tenKh: string;
+  ghiChu: string;
+  maKh: number;
+  ngayTao: string;
+  trangThai: number;
+  trangThaiThanhToan: string;
+  lyDoHuy: string;
+  diaChi: string;
+  sdt: string;
+  chiTietDonHangs: ChiTietDonHang[];
+}
+
+interface Orders {
+  dangXuLy: Order[];
+  dangGiao: Order[];
+  hoanThanh: Order[];
 }
 
 const Index = () => {
-  const [donHangs, setDonHangs] = useState<DonHang[]>([]);
-  const [activeTab, setActiveTab] = useState(0);
+  const [orders, setOrders] = useState<Orders>({
+    dangXuLy: [],
+    dangGiao: [],
+    hoanThanh: [],
+  });
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   useEffect(() => {
-    axios
-      .get<DonHang[]>("/api/DonHangAdmin/DonHangs")
-      .then((response) => {
-        setDonHangs(response.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setDonHangs([]); // Ensure donHangs is an array even if the API call fails
-      });
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.get<Orders>(
+          "https://localhost:7095/api/DonHangAdmin"
+        );
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu đơn hàng:", error);
+      }
+    };
+    fetchOrders();
   }, []);
 
-  const filterDonHangs = (trangThai: number) => {
-    if (!Array.isArray(donHangs)) return [];
-    return donHangs.filter((dh) => dh.TrangThai === trangThai);
+  const handleApproveOrder = async (order: Order) => {
+    try {
+      await axios.put(
+        `https://localhost:7095/api/DonHangAdmin/DuyetDon/${order.maDH}`
+      );
+      setOrders((prevOrders) => {
+        const updatedOrders = { ...prevOrders };
+        const orderIndex = updatedOrders.dangXuLy.findIndex(
+          (o) => o.maDH === order.maDH
+        );
+        if (orderIndex > -1) {
+          const [approvedOrder] = updatedOrders.dangXuLy.splice(orderIndex, 1);
+          approvedOrder.trangThai = 1;
+          updatedOrders.dangGiao.push(approvedOrder);
+        }
+        return updatedOrders;
+      });
+    } catch (error) {
+      console.error("Lỗi khi duyệt đơn hàng:", error);
+    }
+  };
+
+  const handleViewDetails = (order: Order) => {
+    setSelectedOrder(order);
+    // Hiển thị chi tiết đơn hàng trong modal
+    if (order) {
+      // document.getElementById("tenNguoiNhan")!.innerText = order.tenKh;
+      document.getElementById("diaChi")!.innerText = order.diaChi;
+      document.getElementById("soDienThoai")!.innerText = order.sdt;
+      document.getElementById("tenNguoiDat")!.innerText = order.tenKh;
+      document.getElementById("ngayDat")!.innerText = new Date(
+        order.ngayTao
+      ).toLocaleDateString();
+      document.getElementById("trangThaiDonHang")!.innerText =
+        order.trangThai === 0
+          ? "Đang xử lý"
+          : order.trangThai === 1
+          ? "Đang giao"
+          : "Hoàn thành";
+      // document.getElementById("trangThaiThanhToan")!.innerText =
+      //   "Chưa thanh toán";
+      document.getElementById("hinhThucThanhToan")!.innerText =
+        order.trangThaiThanhToan;
+
+      const chiTietSanPham = document.getElementById("chiTietSanPham")!;
+      chiTietSanPham.innerHTML = "";
+      order.chiTietDonHangs.forEach((chiTiet, index) => {
+        const hinhAnhSanPham =
+          chiTiet.sanPham.hinhAnhs.length > 0
+            ? `https://localhost:7095/api/SanPhams/get-pro-img/${chiTiet.sanPham.hinhAnhs[0].tenHinhAnh}`
+            : "";
+
+        chiTietSanPham.innerHTML += `
+          <tr>
+            <td>${index + 1}</td>
+              <td><img src="${hinhAnhSanPham}" alt="${
+          chiTiet.tenSP
+        }" style="width: 100px; height: auto;" /></td>
+            <td>${chiTiet.tenSP}</td>
+            <td>${chiTiet.soLuong}</td>
+            <td>${chiTiet.donGia}</td>
+            <td>${chiTiet.donGia * chiTiet.soLuong}</td>
+          </tr>
+        `;
+      });
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (selectedOrder) {
+      try {
+        await axios.put(
+          `https://localhost:7095/api/DonHangAdmin/HuyDon/${selectedOrder.maDH}`,
+          { lyDoHuy: cancelReason }
+        );
+
+        setOrders((prevOrders) => ({
+          ...prevOrders,
+          dangXuLy: prevOrders.dangXuLy.filter(
+            (order) => order.maDH !== selectedOrder.maDH
+          ),
+          dangGiao: prevOrders.dangGiao.filter(
+            (order) => order.maDH !== selectedOrder.maDH
+          ),
+          hoanThanh: prevOrders.hoanThanh.filter(
+            (order) => order.maDH !== selectedOrder.maDH
+          ),
+        }));
+        setCancelReason("");
+        document.getElementById("HuyDonModal")?.classList.remove("show");
+        document.querySelector(".modal-backdrop")?.remove();
+      } catch (error) {
+        console.error("Lỗi khi hủy đơn hàng:", error);
+      }
+    }
   };
 
   return (
     <div className="container">
       <div className="page-inner">
-        {/* ChiTietModal */}
+        {/* Modal chi tiết đơn hàng */}
         <div
           className="modal fade"
           id="ChiTietModal"
@@ -55,26 +193,24 @@ const Index = () => {
               </div>
               <div className="modal-body">
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-bordered">
                     <thead>
                       <tr>
                         <th>#</th>
+                        <th>Hình ảnh</th>
                         <th>Tên sản phẩm</th>
                         <th>Số lượng</th>
-                        <th>Giá</th>
-                        <th>Thành tiền</th>
+                        <th>Đơn giá</th>
+                        <th>Tổng giá</th>
                       </tr>
                     </thead>
                     <tbody id="chiTietSanPham"></tbody>
                   </table>
                 </div>
-                <div className="row mt-4">
+                <div className="row mb-3">
                   <div className="col-md-6">
-                    <h5>Thông tin người dùng</h5>
-                    <p>
-                      <strong>Tên người nhận:</strong>{" "}
-                      <span id="tenNguoiNhan"></span>
-                    </p>
+                    <h4>Thông tin người đặt</h4>
+
                     <p>
                       <strong>Địa chỉ:</strong> <span id="diaChi"></span>
                     </p>
@@ -86,20 +222,17 @@ const Index = () => {
                       <strong>Tên người đặt:</strong>{" "}
                       <span id="tenNguoiDat"></span>
                     </p>
-                  </div>
-                  <div className="col-md-6">
-                    <h5>Thông tin đơn hàng</h5>
                     <p>
                       <strong>Ngày đặt:</strong> <span id="ngayDat"></span>
                     </p>
+                  </div>
+                  <div className="col-md-6">
+                    <h4>Thông tin đơn hàng</h4>
                     <p>
-                      <strong>Trạng thái:</strong>{" "}
+                      <strong>Trạng thái đơn hàng:</strong>{" "}
                       <span id="trangThaiDonHang"></span>
                     </p>
-                    <p>
-                      <strong>Thanh toán:</strong>{" "}
-                      <span id="trangThaiThanhToan"></span>
-                    </p>
+
                     <p>
                       <strong>Hình thức thanh toán:</strong>{" "}
                       <span id="hinhThucThanhToan"></span>
@@ -107,11 +240,20 @@ const Index = () => {
                   </div>
                 </div>
               </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Đóng
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* HuyDonModal */}
+        {/* Modal hủy đơn hàng */}
         <div
           className="modal fade"
           id="HuyDonModal"
@@ -121,45 +263,47 @@ const Index = () => {
         >
           <div className="modal-dialog">
             <div className="modal-content">
-              <form method="post" action="/api/DonHangAdmin/HuyDon">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="HuyDonModalLabel">
-                    Nhập lý do hủy đơn hàng
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  ></button>
+              <div className="modal-header">
+                <h5 className="modal-title" id="HuyDonModalLabel">
+                  Hủy đơn hàng
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="cancelReason" className="form-label">
+                    Lý do hủy đơn hàng
+                  </label>
+                  <textarea
+                    id="cancelReason"
+                    className="form-control"
+                    rows={3}
+                    value={cancelReason}
+                    onChange={(e) => setCancelReason(e.target.value)}
+                  ></textarea>
                 </div>
-                <div className="modal-body">
-                  <input type="hidden" id="donHangId" name="id" />
-                  <div className="mb-3">
-                    <label htmlFor="lyDoHuy" className="col-form-label">
-                      Lý do hủy:
-                    </label>
-                    <textarea
-                      className="form-control"
-                      id="lyDoHuy"
-                      name="LyDoHuy"
-                      required
-                    ></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-bs-dismiss="modal"
-                  >
-                    Đóng
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Lưu
-                  </button>
-                </div>
-              </form>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleCancelOrder}
+                >
+                  Xác nhận hủy
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -177,52 +321,48 @@ const Index = () => {
               >
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === 0 ? "active" : ""}`}
+                    className="nav-link active"
                     id="line-home-tab"
                     data-bs-toggle="pill"
                     href="#line-home"
                     role="tab"
-                    aria-controls="pills-home"
-                    aria-selected={activeTab === 0}
-                    onClick={() => setActiveTab(0)}
+                    aria-controls="line-home"
+                    aria-selected="true"
                   >
                     Đang xử lý
                   </a>
                 </li>
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === 1 ? "active" : ""}`}
+                    className="nav-link"
                     id="line-profile-tab"
                     data-bs-toggle="pill"
                     href="#line-profile"
                     role="tab"
-                    aria-controls="pills-profile"
-                    aria-selected={activeTab === 1}
-                    onClick={() => setActiveTab(1)}
+                    aria-controls="line-profile"
+                    aria-selected="false"
                   >
                     Đang giao
                   </a>
                 </li>
                 <li className="nav-item">
                   <a
-                    className={`nav-link ${activeTab === 2 ? "active" : ""}`}
+                    className="nav-link"
                     id="line-contact-tab"
                     data-bs-toggle="pill"
                     href="#line-contact"
                     role="tab"
-                    aria-controls="pills-contact"
-                    aria-selected={activeTab === 2}
-                    onClick={() => setActiveTab(2)}
+                    aria-controls="line-contact"
+                    aria-selected="false"
                   >
                     Hoàn thành
                   </a>
                 </li>
               </ul>
               <div className="tab-content mt-3 mb-3" id="line-tabContent">
+                {/* Đang xử lý */}
                 <div
-                  className={`tab-pane fade ${
-                    activeTab === 0 ? "show active" : ""
-                  }`}
+                  className="tab-pane fade show active"
                   id="line-home"
                   role="tabpanel"
                   aria-labelledby="line-home-tab"
@@ -239,41 +379,52 @@ const Index = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filterDonHangs(0).map((dh, index) => (
-                          <tr key={index}>
-                            <td>{dh.MaDH}</td>
-                            <td>{dh.TenKh}</td>
-                            <td>{dh.NgayTao}</td>
-                            <td>Đang xử lý</td>
+                        {orders.dangXuLy.map((order) => (
+                          <tr key={order.maDH}>
+                            <td>{order.maDH}</td>
+                            <td>{order.tenKh}</td>
                             <td>
-                              <a className="btn ">
-                                <i
-                                  style={{ color: "green" }}
-                                  className="fas fa-check"
-                                ></i>
-                              </a>
-                              <button
-                                className="btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#ChiTietModal"
-                                data-id={dh.MaDH}
-                              >
-                                <i
-                                  style={{ color: "blue" }}
-                                  className="fas fa-info-circle"
-                                ></i>
-                              </button>
-                              <button
-                                className="btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#HuyDonModal"
-                                data-id={dh.MaDH}
-                              >
-                                <i
-                                  style={{ color: "red" }}
-                                  className="fas fa-times-circle"
-                                ></i>
-                              </button>
+                              {new Date(order.ngayTao).toLocaleDateString()}
+                            </td>
+                            <td>
+                              {order.trangThai === 0
+                                ? "Đang xử lý"
+                                : order.trangThai === 1
+                                ? "Đang giao"
+                                : "Hoàn thành"}
+                            </td>
+                            <td>
+                              {order.trangThai !== -1 && (
+                                <>
+                                  <button
+                                    className="btn btn-link btn-primary"
+                                    onClick={() => handleApproveOrder(order)}
+                                  >
+                                    <i className="fas fa-check"></i>
+                                  </button>
+                                  <button
+                                    className="btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#ChiTietModal"
+                                    onClick={() => handleViewDetails(order)}
+                                  >
+                                    <i className="fas fa-bars"></i>
+                                  </button>
+                                  {order.trangThai === 0 && (
+                                    <button
+                                      className="btn"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#HuyDonModal"
+                                      onClick={() => setSelectedOrder(order)}
+                                    >
+                                      <i
+                                        style={{ color: "red" }}
+                                        className="fas fa-times"
+                                      ></i>
+                                    </button>
+                                  )}
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -281,10 +432,10 @@ const Index = () => {
                     </table>
                   </div>
                 </div>
+
+                {/* Đang giao */}
                 <div
-                  className={`tab-pane fade ${
-                    activeTab === 1 ? "show active" : ""
-                  }`}
+                  className="tab-pane fade"
                   id="line-profile"
                   role="tabpanel"
                   aria-labelledby="line-profile-tab"
@@ -301,40 +452,34 @@ const Index = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filterDonHangs(1).map((dh, index) => (
-                          <tr key={index}>
-                            <td>{dh.MaDH}</td>
-                            <td>{dh.TenKh}</td>
-                            <td>{dh.NgayTao}</td>
-                            <td>Đang giao</td>
+                        {orders.dangGiao.map((order) => (
+                          <tr key={order.maDH}>
+                            <td>{order.maDH}</td>
+                            <td>{order.tenKh}</td>
                             <td>
-                              <a className="btn ">
-                                <i
-                                  style={{ color: "green" }}
-                                  className="fas fa-check"
-                                ></i>
-                              </a>
+                              {new Date(order.ngayTao).toLocaleDateString()}
+                            </td>
+                            <td>
+                              {order.trangThai === 0
+                                ? "Đang xử lý"
+                                : order.trangThai === 1
+                                ? "Đang giao"
+                                : "Hoàn thành"}
+                            </td>
+                            <td>
                               <button
-                                className="btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#ChiTietModal"
-                                data-id={dh.MaDH}
+                                className="btn btn-link btn-primary"
+                                onClick={() => handleApproveOrder(order)}
                               >
-                                <i
-                                  style={{ color: "blue" }}
-                                  className="fas fa-info-circle"
-                                ></i>
+                                <i className="fas fa-check"></i>
                               </button>
                               <button
                                 className="btn"
                                 data-bs-toggle="modal"
-                                data-bs-target="#HuyDonModal"
-                                data-id={dh.MaDH}
+                                data-bs-target="#ChiTietModal"
+                                onClick={() => handleViewDetails(order)}
                               >
-                                <i
-                                  style={{ color: "red" }}
-                                  className="fas fa-times-circle"
-                                ></i>
+                                <i className="fas fa-bars"></i>
                               </button>
                             </td>
                           </tr>
@@ -343,10 +488,10 @@ const Index = () => {
                     </table>
                   </div>
                 </div>
+
+                {/* Hoàn thành */}
                 <div
-                  className={`tab-pane fade ${
-                    activeTab === 2 ? "show active" : ""
-                  }`}
+                  className="tab-pane fade"
                   id="line-contact"
                   role="tabpanel"
                   aria-labelledby="line-contact-tab"
@@ -363,40 +508,28 @@ const Index = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filterDonHangs(2).map((dh, index) => (
-                          <tr key={index}>
-                            <td>{dh.MaDH}</td>
-                            <td>{dh.TenKh}</td>
-                            <td>{dh.NgayTao}</td>
-                            <td>Hoàn thành</td>
+                        {orders.hoanThanh.map((order) => (
+                          <tr key={order.maDH}>
+                            <td>{order.maDH}</td>
+                            <td>{order.tenKh}</td>
                             <td>
-                              <a className="btn ">
-                                <i
-                                  style={{ color: "green" }}
-                                  className="fas fa-check"
-                                ></i>
-                              </a>
+                              {new Date(order.ngayTao).toLocaleDateString()}
+                            </td>
+                            <td>
+                              {order.trangThai === 0
+                                ? "Đang xử lý"
+                                : order.trangThai === 1
+                                ? "Đang giao"
+                                : "Hoàn thành"}
+                            </td>
+                            <td>
                               <button
                                 className="btn"
                                 data-bs-toggle="modal"
                                 data-bs-target="#ChiTietModal"
-                                data-id={dh.MaDH}
+                                onClick={() => handleViewDetails(order)}
                               >
-                                <i
-                                  style={{ color: "blue" }}
-                                  className="fas fa-info-circle"
-                                ></i>
-                              </button>
-                              <button
-                                className="btn"
-                                data-bs-toggle="modal"
-                                data-bs-target="#HuyDonModal"
-                                data-id={dh.MaDH}
-                              >
-                                <i
-                                  style={{ color: "red" }}
-                                  className="fas fa-times-circle"
-                                ></i>
+                                <i className="fas fa-bars"></i>
                               </button>
                             </td>
                           </tr>
@@ -405,37 +538,6 @@ const Index = () => {
                     </table>
                   </div>
                 </div>
-              </div>
-              <div className="d-flex justify-content-center mt-3">
-                <nav>
-                  <ul className="pagination">
-                    <li className="page-item">
-                      <a className="page-link" href="#" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                      </a>
-                    </li>
-                    <li className="page-item active">
-                      <a className="page-link" href="#">
-                        1
-                      </a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        2
-                      </a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#">
-                        3
-                      </a>
-                    </li>
-                    <li className="page-item">
-                      <a className="page-link" href="#" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
               </div>
             </div>
           </div>
