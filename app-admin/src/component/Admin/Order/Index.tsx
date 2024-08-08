@@ -92,6 +92,34 @@ const Index = () => {
     }
   };
 
+  const handleAppHoanThanh = async (order: Order) => {
+    try {
+      // Gọi API để cập nhật trạng thái đơn hàng
+      await axios.put(
+        `https://localhost:7095/api/DonHangAdmin/HoanThanh/${order.maDH}`
+      );
+
+      // Cập nhật danh sách đơn hàng trên frontend
+      setOrders((prevOrders) => {
+        const updatedOrders = { ...prevOrders };
+        const orderIndex = updatedOrders.dangGiao.findIndex(
+          (o) => o.maDH === order.maDH
+        );
+
+        if (orderIndex > -1) {
+          // Cập nhật trạng thái đơn hàng từ 'Đang giao' sang 'Hoàn thành'
+          const [completedOrder] = updatedOrders.dangGiao.splice(orderIndex, 1);
+          completedOrder.trangThai = 2; // Đã hoàn thành
+          updatedOrders.hoanThanh.push(completedOrder);
+        }
+
+        return updatedOrders;
+      });
+    } catch (error) {
+      console.error("Lỗi khi hoàn thành đơn hàng:", error);
+    }
+  };
+
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
     // Hiển thị chi tiết đơn hàng trong modal
@@ -469,7 +497,7 @@ const Index = () => {
                             <td>
                               <button
                                 className="btn btn-link btn-primary"
-                                onClick={() => handleApproveOrder(order)}
+                                onClick={() => handleAppHoanThanh(order)}
                               >
                                 <i className="fas fa-check"></i>
                               </button>
