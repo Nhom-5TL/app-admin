@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const UpdateCategory = () => {
-  const { MaLoai } = useParams<{ MaLoai: string }>();
-  const [productName, setProductName] = useState("");
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+interface UpdateCategoryModalProps {
+  maLoai: number;
+  onClose: () => void;
+  onCategoryUpdated: () => void;
+}
+
+const UpdateCategoryModal: React.FC<UpdateCategoryModalProps> = ({ maLoai, onClose, onCategoryUpdated }) => {
+  const [productName, setProductName] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const response = await axios.get(`https://localhost:7095/api/loais/${MaLoai}`);
-        console.log("Dữ liệu trả về từ API:", response.data); // Kiểm tra dữ liệu
+        const response = await axios.get(`https://localhost:7095/api/loais/${maLoai}`);
         setProductName(response.data.tenLoai);
         setLoading(false);
       } catch (error) {
@@ -22,19 +26,19 @@ const UpdateCategory = () => {
     };
 
     fetchCategory();
-  }, [MaLoai]);
+  }, [maLoai]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleUpdateCategory = async () => {
     try {
-      await axios.put(`https://localhost:7095/api/loais/${MaLoai}`, {
-        maLoai: MaLoai,
+      await axios.put(`https://localhost:7095/api/loais/${maLoai}`, {
+        maLoai,
         tenLoai: productName,
       });
-      navigate("/category");
+      toast.success("Cập nhật loại sản phẩm thành công!"); // Add success toast notification
+      onCategoryUpdated();
+      onClose();
     } catch (error) {
-      console.error("Lỗi khi sửa loại sản phẩm:", error);
+      console.error("Lỗi khi cập nhật loại sản phẩm:", error);
     }
   };
 
@@ -43,35 +47,31 @@ const UpdateCategory = () => {
   }
 
   return (
-    <div className="container mt-3">
-      <div className="row">
-        <div className="col-md-10">
-          <div className="container mt-5">
-            <div className="card">
-              <div className="card-header">Sửa loại sản phẩm</div>
-
-              <div className="card-body">
-                <div className="container mt-5">
-                  <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                      <label htmlFor="productName">Tên loại sản phẩm</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="productName"
-                        value={productName}
-                        onChange={(e) => setProductName(e.target.value)}
-                        placeholder="Nhập tên sản phẩm"
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary mt-3">
-                      Sửa sản phẩm
-                    </button>
-                  </form>
-                </div>
-              </div>
+    <div className="modal fade show" tabIndex={-1} role="dialog" style={{ display: "block" }}>
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Cập nhật Loại Sản Phẩm</h5>
+            <button type="button" className="btn-close" aria-label="Close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body">
+            <div className="form-group">
+              <label>Tên Loại Sản Phẩm</label>
+              <input
+                type="text"
+                className="form-control"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+              />
             </div>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Đóng
+            </button>
+            <button type="button" className="btn btn-primary" onClick={handleUpdateCategory}>
+              Cập nhật
+            </button>
           </div>
         </div>
       </div>
@@ -79,4 +79,5 @@ const UpdateCategory = () => {
   );
 };
 
-export default UpdateCategory;
+export default UpdateCategoryModal;
+  

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Create from "./Create";
+import UpdateThuongHieu from "./UpdateThuongHieu";
 
 interface NhanHieu {
   maNhanHieu: number;
@@ -12,6 +13,9 @@ interface NhanHieu {
 const Index = () => {
   const [ThuongHieus, setThuongHieu] = useState<NhanHieu[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedNhanHieu, setSelectedNhanHieu] = useState<NhanHieu | null>(null);
 
   const fetchThuongHieu = async () => {
     try {
@@ -49,6 +53,19 @@ const Index = () => {
     }
   };
 
+  const toggleCreateModal = () => {
+    setShowCreateModal(!showCreateModal);
+  };
+
+  const toggleUpdateModal = (nhanHieu: NhanHieu | null = null) => {
+    setSelectedNhanHieu(nhanHieu);
+    setShowUpdateModal(!showUpdateModal);
+  };
+
+  const reloadData = () => {
+    fetchThuongHieu();
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -63,12 +80,12 @@ const Index = () => {
               <div className="card-header">
                 <div className="d-flex align-items-center">
                   <h4 className="card-title">Thương hiệu sản phẩm</h4>
-                  <Link
+                  <button
                     className="btn btn-primary btn-round ms-auto"
-                    to="/ThuongHieu/Create"
+                    onClick={toggleCreateModal}
                   >
                     <i className="fa fa-plus"></i> Thêm Thương hiệu
-                  </Link>
+                  </button>
                 </div>
               </div>
               <div className="card-body">
@@ -88,12 +105,12 @@ const Index = () => {
                         <tr key={thuongHieu.maNhanHieu}>
                           <td>{thuongHieu.tenNhanHieu}</td>
                           <td>
-                            <Link
-                              to={`/ThuongHieu/Update/${thuongHieu.maNhanHieu}`}
+                            <button
+                              onClick={() => toggleUpdateModal(thuongHieu)}
                               className="btn btn-link btn-primary btn-lg"
                             >
                               <i className="fa fa-edit"></i>
-                            </Link>
+                            </button>
                             <button
                               type="button"
                               className="btn btn-link btn-danger"
@@ -114,6 +131,56 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Thêm Thương hiệu</h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={toggleCreateModal}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <Create closeModal={() => { toggleCreateModal(); reloadData(); }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Modal */}
+      {showUpdateModal && selectedNhanHieu && (
+        <div className="modal show" style={{ display: "block" }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Cập nhật Thương hiệu</h5>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => toggleUpdateModal(null)}
+                >
+                  <span>&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <UpdateThuongHieu
+                  maNhanHieu={selectedNhanHieu.maNhanHieu}
+                  tenNhanHieu={selectedNhanHieu.tenNhanHieu}
+                  closeModal={() => { toggleUpdateModal(null); reloadData(); }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
