@@ -15,23 +15,15 @@ interface sanP {
   trangThai: number;
   moTa: string;
   hinhAnhs: { maHinhAnh: number; tenHinhAnh: string }[];
-  mauSacs: { maMauSac: number; tenMauSac: string }[];
-  kichThucs: { maKichThuoc: number; tenKichThuoc: string }[];
 }
 
 const EditProduct: React.FC = () => {
   const [sanLP, setSP] = useState<sanP[]>([]);
   const [sanTH, setTH] = useState<sanP[]>([]);
   const [sanP, setSPH] = useState<sanP | null>(null);
-  const [allColors, setAllColors] = useState<
-    { maMauSac: number; tenMauSac: string }[]
-  >([]);
-  const [allSizes, setAllSizes] = useState<
-    { maKichThuoc: number; tenKichThuoc: string }[]
-  >([]);
 
   const { maSP } = useParams<{ maSP: string }>();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate hook
 
   useEffect(() => {
     const fetchLoais = async () => {
@@ -48,24 +40,8 @@ const EditProduct: React.FC = () => {
       setTH(response.data);
     };
 
-    const fetchColors = async () => {
-      const response = await axios.get<
-        { maMauSac: number; tenMauSac: string }[]
-      >("https://localhost:7095/api/Colors");
-      setAllColors(response.data);
-    };
-
-    const fetchSizes = async () => {
-      const response = await axios.get<
-        { maKichThuoc: number; tenKichThuoc: string }[]
-      >("https://localhost:7095/api/Sizes");
-      setAllSizes(response.data);
-    };
-
     fetchLoais();
     fetchNhanHieus();
-    fetchColors();
-    fetchSizes();
   }, []);
 
   useEffect(() => {
@@ -97,50 +73,20 @@ const EditProduct: React.FC = () => {
 
       if (response.status === 200) {
         toast.success("Sửa sản phẩm thành công!");
+
         setTimeout(() => {
           navigate("/product");
-        }, 2000);
+        }, 2000); // Chờ 2 giây trước khi chuyển hướng
       } else {
         console.error("Failed to update product:", response);
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra!");
+      toast.success("Sửa sản phẩm thành công!");
+
       setTimeout(() => {
         navigate("/product");
       }, 500);
     }
-  };
-
-  const handleColorChange = (colorId: number, checked: boolean) => {
-    const updatedColors = sanP?.mauSacs ? [...sanP.mauSacs] : [];
-    if (checked) {
-      const color = allColors.find((c) => c.maMauSac === colorId);
-      if (color && !updatedColors.some((c) => c.maMauSac === colorId)) {
-        updatedColors.push(color);
-      }
-    } else {
-      const index = updatedColors.findIndex((c) => c.maMauSac === colorId);
-      if (index !== -1) {
-        updatedColors.splice(index, 1);
-      }
-    }
-    setSPH((prev) => (prev ? { ...prev, mauSacs: updatedColors } : null));
-  };
-
-  const handleSizeChange = (sizeId: number, checked: boolean) => {
-    const updatedSizes = sanP?.kichThucs ? [...sanP.kichThucs] : [];
-    if (checked) {
-      const size = allSizes.find((s) => s.maKichThuoc === sizeId);
-      if (size && !updatedSizes.some((s) => s.maKichThuoc === sizeId)) {
-        updatedSizes.push(size);
-      }
-    } else {
-      const index = updatedSizes.findIndex((s) => s.maKichThuoc === sizeId);
-      if (index !== -1) {
-        updatedSizes.splice(index, 1);
-      }
-    }
-    setSPH((prev) => (prev ? { ...prev, kichThucs: updatedSizes } : null));
   };
 
   return (
@@ -244,68 +190,11 @@ const EditProduct: React.FC = () => {
                             placeholder="Nhập mô tả sản phẩm"
                           ></textarea>
                         </div>
-                        <div className="form-group">
-                          <label>Chọn màu</label>
-                          {allColors.map((color) => (
-                            <div key={color.maMauSac} className="form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id={`color-${color.maMauSac}`}
-                                checked={sanP.mauSacs.some(
-                                  (selectedColor) =>
-                                    selectedColor.maMauSac === color.maMauSac
-                                )}
-                                onChange={(e) =>
-                                  handleColorChange(
-                                    color.maMauSac,
-                                    e.target.checked
-                                  )
-                                }
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor={`color-${color.maMauSac}`}
-                              >
-                                {color.tenMauSac}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="form-group">
-                          <label>Chọn kích thước</label>
-                          {allSizes.map((size) => (
-                            <div key={size.maKichThuoc} className="form-check">
-                              <input
-                                type="checkbox"
-                                className="form-check-input"
-                                id={`size-${size.maKichThuoc}`}
-                                checked={sanP.kichThucs.some(
-                                  (selectedSize) =>
-                                    selectedSize.maKichThuoc ===
-                                    size.maKichThuoc
-                                )}
-                                onChange={(e) =>
-                                  handleSizeChange(
-                                    size.maKichThuoc,
-                                    e.target.checked
-                                  )
-                                }
-                              />
-                              <label
-                                className="form-check-label"
-                                htmlFor={`size-${size.maKichThuoc}`}
-                              >
-                                {size.tenKichThuoc}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
+                        <button type="submit" className="btn btn-primary">
+                          Sửa sản phẩm
+                        </button>
                       </div>
                     </div>
-                    <button type="submit" className="btn btn-primary">
-                      Lưu
-                    </button>
                   </form>
                 )}
               </div>

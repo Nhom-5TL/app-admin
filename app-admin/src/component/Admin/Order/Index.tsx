@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Modal } from "bootstrap";
+import { toast } from "react-toastify";
 
 interface ChiTietDonHang {
   maCTDH: number;
@@ -35,6 +37,7 @@ interface Order {
   ngayTao: string;
   trangThai: number;
   trangThaiThanhToan: string;
+  trangThaiTT: number;
   lyDoHuy: string;
   diaChi: string;
   sdt: string;
@@ -45,6 +48,7 @@ interface Orders {
   dangXuLy: Order[];
   dangGiao: Order[];
   hoanThanh: Order[];
+  donHuy: Order[];
 }
 
 const Index = () => {
@@ -52,6 +56,7 @@ const Index = () => {
     dangXuLy: [],
     dangGiao: [],
     hoanThanh: [],
+    donHuy: [],
   });
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [cancelReason, setCancelReason] = useState("");
@@ -90,6 +95,8 @@ const Index = () => {
         }
         return updatedOrders;
       });
+
+      toast.success("Duyệt đơn hàng thành công!");
     } catch (error) {
       console.error("Lỗi khi duyệt đơn hàng:", error);
     }
@@ -102,7 +109,6 @@ const Index = () => {
         `https://localhost:7095/api/DonHangAdmin/HoanThanh/${order.maDH}`
       );
 
-      // Cập nhật danh sách đơn hàng trên frontend
       setOrders((prevOrders) => {
         const updatedOrders = { ...prevOrders };
         const orderIndex = updatedOrders.dangGiao.findIndex(
@@ -110,14 +116,15 @@ const Index = () => {
         );
 
         if (orderIndex > -1) {
-          // Cập nhật trạng thái đơn hàng từ 'Đang giao' sang 'Hoàn thành'
           const [completedOrder] = updatedOrders.dangGiao.splice(orderIndex, 1);
-          completedOrder.trangThai = 2; // Đã hoàn thành
+          completedOrder.trangThai = 2;
           updatedOrders.hoanThanh.push(completedOrder);
         }
 
         return updatedOrders;
       });
+
+      toast.success("Duyệt đơn hàng thành công!");
     } catch (error) {
       console.error("Lỗi khi hoàn thành đơn hàng:", error);
     }
@@ -125,7 +132,7 @@ const Index = () => {
 
   const handleViewDetails = (order: Order) => {
     setSelectedOrder(order);
-    // Hiển thị chi tiết đơn hàng trong modal
+
     if (order) {
       // document.getElementById("tenNguoiNhan")!.innerText = order.tenKh;
       document.getElementById("diaChi")!.innerText = order.diaChi;
@@ -139,9 +146,12 @@ const Index = () => {
           ? "Đang xử lý"
           : order.trangThai === 1
           ? "Đang giao"
-          : "Hoàn thành";
-      // document.getElementById("trangThaiThanhToan")!.innerText =
-      //   "Chưa thanh toán";
+          : order.trangThai === 2
+          ? "Hoàn thành"
+          : "Đã hủy";
+      document.getElementById("trangThaiThanhToan")!.innerText =
+        order.trangThaiTT === 1 ? "Đã thanh toán" : "Chưa thanh toán";
+
       document.getElementById("hinhThucThanhToan")!.innerText =
         order.trangThaiThanhToan;
 
@@ -169,29 +179,42 @@ const Index = () => {
     }
   };
 
-  const handleCancelOrder = async () => {
+  const handleHuyDon = async () => {
     if (selectedOrder) {
       try {
+        // Gửi yêu cầu hủy đơn hàng đến API
         await axios.put(
           `https://localhost:7095/api/DonHangAdmin/HuyDon/${selectedOrder.maDH}`,
           { lyDoHuy: cancelReason }
         );
 
-        setOrders((prevOrders) => ({
-          ...prevOrders,
-          dangXuLy: prevOrders.dangXuLy.filter(
-            (order) => order.maDH !== selectedOrder.maDH
-          ),
-          dangGiao: prevOrders.dangGiao.filter(
-            (order) => order.maDH !== selectedOrder.maDH
-          ),
-          hoanThanh: prevOrders.hoanThanh.filter(
-            (order) => order.maDH !== selectedOrder.maDH
-          ),
-        }));
-        setCancelReason("");
-        document.getElementById("HuyDonModal")?.classList.remove("show");
-        document.querySelector(".modal-backdrop")?.remove();
+        // Cập nhật trạng thái đơn hàng trong frontend
+        setOrders((prevOrders) => {
+          const updatedOrders = { ...prevOrders };
+          const orderIndex = updatedOrders.dangXuLy.findIndex(
+            (o) => o.maDH === selectedOrder.maDH
+          );
+
+          if (orderIndex > -1) {
+            const [canceledOrder] = updatedOrders.dangXuLy.splice(
+              orderIndex,
+              1
+            );
+            canceledOrder.trangThai = 3;
+            updatedOrders.hoanThanh.push(canceledOrder);
+          }
+
+          return updatedOrders;
+        });
+
+        // Đóng modal sau khi hủy thành công
+        const modalElement = document.getElementById(
+          "HuyDonModal"
+        ) as HTMLElement;
+        const bootstrapModal = new Modal(modalElement); // Use Modal class from Bootstrap
+        bootstrapModal.hide();
+
+        toast.success("Hủy đơn hàng thành công!");
       } catch (error) {
         console.error("Lỗi khi hủy đơn hàng:", error);
       }
@@ -232,7 +255,7 @@ const Index = () => {
                         <th>Tên sản phẩm</th>
                         <th>Số lượng</th>
                         <th>Đơn giá</th>
-                        <th>Tổng giá</th>
+                        <th>Tổng tiền</th>
                       </tr>
                     </thead>
                     <tbody id="chiTietSanPham"></tbody>
@@ -241,20 +264,16 @@ const Index = () => {
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <h4>Thông tin người đặt</h4>
-
                     <p>
-                      <strong>Địa chỉ:</strong> <span id="diaChi"></span>
+                      <strong>Tên người đặt:</strong>{" "}
+                      <span id="tenNguoiDat"></span>
                     </p>
                     <p>
                       <strong>Số điện thoại:</strong>{" "}
                       <span id="soDienThoai"></span>
                     </p>
                     <p>
-                      <strong>Tên người đặt:</strong>{" "}
-                      <span id="tenNguoiDat"></span>
-                    </p>
-                    <p>
-                      <strong>Ngày đặt:</strong> <span id="ngayDat"></span>
+                      <strong>Địa chỉ:</strong> <span id="diaChi"></span>
                     </p>
                   </div>
                   <div className="col-md-6">
@@ -263,10 +282,17 @@ const Index = () => {
                       <strong>Trạng thái đơn hàng:</strong>{" "}
                       <span id="trangThaiDonHang"></span>
                     </p>
+                    <p>
+                      <strong>Trạng thái thanh toán:</strong>{" "}
+                      <span id="trangThaiThanhToan"></span>
+                    </p>
 
                     <p>
                       <strong>Hình thức thanh toán:</strong>{" "}
                       <span id="hinhThucThanhToan"></span>
+                    </p>
+                    <p>
+                      <strong>Ngày đặt:</strong> <span id="ngayDat"></span>
                     </p>
                   </div>
                 </div>
@@ -307,12 +333,12 @@ const Index = () => {
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label htmlFor="cancelReason" className="form-label">
-                    Lý do hủy đơn hàng
+                  <label htmlFor="lyDoHuy" className="form-label">
+                    Lý do hủy
                   </label>
                   <textarea
-                    id="cancelReason"
                     className="form-control"
+                    id="lyDoHuy"
                     rows={3}
                     value={cancelReason}
                     onChange={(e) => setCancelReason(e.target.value)}
@@ -329,10 +355,11 @@ const Index = () => {
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
-                  onClick={handleCancelOrder}
+                  className="btn btn-danger"
+                  data-bs-dismiss="modal"
+                  onClick={handleHuyDon}
                 >
-                  Xác nhận hủy
+                  Hủy đơn hàng
                 </button>
               </div>
             </div>
@@ -389,6 +416,20 @@ const Index = () => {
                     Hoàn thành
                   </a>
                 </li>
+                <li className="nav-item" role="presentation">
+                  <button
+                    className="nav-link"
+                    id="donHuy-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#donHuy"
+                    type="button"
+                    role="tab"
+                    aria-controls="donHuy"
+                    aria-selected="false"
+                  >
+                    Đơn hủy
+                  </button>
+                </li>
               </ul>
               <div className="tab-content mt-3 mb-3" id="line-tabContent">
                 {/* Đang xử lý */}
@@ -441,19 +482,20 @@ const Index = () => {
                                   >
                                     <i className="fas fa-bars"></i>
                                   </button>
-                                  {order.trangThai === 0 && (
-                                    <button
-                                      className="btn"
-                                      data-bs-toggle="modal"
-                                      data-bs-target="#HuyDonModal"
-                                      onClick={() => setSelectedOrder(order)}
-                                    >
-                                      <i
-                                        style={{ color: "red" }}
-                                        className="fas fa-times"
-                                      ></i>
-                                    </button>
-                                  )}
+                                  {order.trangThai === 0 &&
+                                    order.trangThaiThanhToan === "COD" && (
+                                      <button
+                                        className="btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#HuyDonModal"
+                                        onClick={() => setSelectedOrder(order)}
+                                      >
+                                        <i
+                                          style={{ color: "red" }}
+                                          className="fas fa-times"
+                                        ></i>
+                                      </button>
+                                    )}
                                 </>
                               )}
                             </td>
@@ -568,6 +610,51 @@ const Index = () => {
                       </tbody>
                     </table>
                   </div>
+                </div>
+
+                {/* Đơn hủy */}
+                <div
+                  className="tab-pane fade"
+                  id="donHuy"
+                  role="tabpanel"
+                  aria-labelledby="donHuy-tab"
+                >
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Tên khách hàng</th>
+                        <th>Ngày đặt</th>
+
+                        <th>Trạng thái</th>
+                        <th>Lý do hủy</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.donHuy.map((order, index) => (
+                        <tr key={order.maDH}>
+                          <td>{index + 1}</td>
+                          <td>{order.tenKh}</td>
+                          <td>
+                            {new Date(order.ngayTao).toLocaleDateString()}
+                          </td>
+                          <td>Đã hủy</td>
+                          <td>{order.lyDoHuy}</td>
+                          <td>
+                            <button
+                              className="btn btn-sm"
+                              data-bs-toggle="modal"
+                              data-bs-target="#ChiTietModal"
+                              onClick={() => handleViewDetails(order)}
+                            >
+                              <i className="fas fa-bars"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
