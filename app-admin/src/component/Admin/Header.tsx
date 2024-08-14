@@ -57,6 +57,12 @@ const Header = () => {
                   <p>Đơn hàng</p>
                 </a>
               </li>
+              <li className="nav-item active">
+                <a href="/thongk">
+                  <i className="fas fa-money-check"></i>
+                  <p>Thống Kê</p>
+                </a>
+              </li>
             </ul>
           </div>
         </div>
