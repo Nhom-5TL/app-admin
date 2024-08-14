@@ -14,9 +14,13 @@ interface SanPhamDTO {
 
 export const LinkImg = "https://localhost:7095/api/SanPhams/get-pro-img/";
 
+const ITEMS_PER_PAGE = 8;
+
 const Index = () => {
   const [sanPhams, setSanPhams] = useState<SanPhamDTO[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,6 +29,7 @@ const Index = () => {
         const response = await axios.get("https://localhost:7095/api/SanPhams");
         console.log("DỮ LIỆU:", response.data);
         setSanPhams(response.data);
+        setTotalPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
       } catch (error) {
         console.error("Lỗi khi lấy sản phẩm:", error);
       }
@@ -70,6 +75,15 @@ const Index = () => {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const paginatedProducts = sanPhams.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="container">
       <div className="page-inner">
@@ -105,7 +119,7 @@ const Index = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {sanPhams.map((item) => (
+                      {paginatedProducts.map((item) => (
                         <tr key={item.maSP}>
                           <td>{item.maSP}</td>
                           <td>
@@ -141,6 +155,32 @@ const Index = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+
+                <div className="pagination">
+                  <button
+                    className={`btn btn-secondary ${currentPage === 1 ? 'disabled' : ''}`}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Trước
+                  </button>
+                  {Array.from({ length: totalPages }, (_, index) => (
+                    <button
+                      key={index + 1}
+                      className={`btn ${currentPage === index + 1 ? 'active' : 'btn-secondary'}`}
+                      onClick={() => handlePageChange(index + 1)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  <button
+                    className={`btn btn-secondary ${currentPage === totalPages ? 'disabled' : ''}`}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau
+                  </button>
                 </div>
 
                 {/* Modal Xóa */}
