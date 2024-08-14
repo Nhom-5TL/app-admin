@@ -3,6 +3,7 @@ import axios from "axios";
 import AddCategoryModal from "./Create"; // Import modal thêm loại sản phẩm
 import UpdateCategoryModal from "./UpdateCategory"; // Import modal cập nhật loại sản phẩm
 import "./catagory.css";
+import { toast } from "react-toastify";
 
 interface Category {
   maLoai: number;
@@ -36,7 +37,8 @@ const Index = () => {
     if (confirmDelete) {
       try {
         await axios.delete(`https://localhost:7095/api/loais/${id}`);
-        setCategories(categories.filter(category => category.maLoai !== id));
+        setCategories(categories.filter(category => category.maLoai !== id))
+        toast.success("Xóa loại thành công!");
       } catch (error) {
         console.error("Lỗi khi xóa loại sản phẩm:", error);
       }
