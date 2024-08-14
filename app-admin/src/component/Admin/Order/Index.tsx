@@ -75,6 +75,9 @@ const Index = () => {
       await axios.put(
         `https://localhost:7095/api/DonHangAdmin/DuyetDon/${order.maDH}`
       );
+      await axios.post(
+        `https://localhost:7095/api/GioHangs/send-email-${order.maDH}`
+    );
       setOrders((prevOrders) => {
         const updatedOrders = { ...prevOrders };
         const orderIndex = updatedOrders.dangXuLy.findIndex(
