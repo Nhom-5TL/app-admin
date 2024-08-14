@@ -1,74 +1,55 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./catagory.css";
 
-const Create = () => {
-  const [productName, setProductName] = useState("");
-  const navigate = useNavigate();
+interface AddCategoryModalProps {
+  onClose: () => void;
+  onCategoryAdded: () => void;
+}
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setProductName(event.target.value);
-  };
+const AddCategoryModal: React.FC<AddCategoryModalProps> = ({ onClose, onCategoryAdded }) => {
+  const [tenLoai, setTenLoai] = useState("");
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleAddCategory = async () => {
     try {
-      const response = await axios.post("https://localhost:7095/api/loais", {
-        TenLoai: productName,
-      });
-      console.log("Thêm thành công", response.data);
-      alert("Thêm thương hiệu thành công");
-      navigate("/category");
+      await axios.post("https://localhost:7095/api/loais", { tenLoai });
+      toast.success("Thêm loại sản phẩm thành công!"); // Hiển thị thông báo thành công
+      onCategoryAdded();
+      onClose();
     } catch (error) {
       console.error("Lỗi khi thêm loại sản phẩm:", error);
-      alert("Đã xảy ra lỗi khi thêm loại sản phẩm!");
+      toast.error("Thêm loại sản phẩm thất bại!"); // Hiển thị thông báo lỗi
     }
   };
 
   return (
-    <div className="container mt-5" style={{ marginLeft: "15%" }}>
-      <div className="row">
-        <div className="col-md-8">
-          <div className="card">
-            <div className="card-header"></div>
-            <div className="card-body">
-              <div className="row">
-                <div className="col-md-10">
-                  <div className="row">
-                    <div className="col-md-6">
-                      <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                          <label>Tên loại sản phẩm</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="productName"
-                            placeholder="Nhập tên loại sản phẩm"
-                            value={productName}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                        <button
-                          type="submit"
-                          className="btn btn-primary btn-left"
-                          style={{ marginLeft: "10px" }}
-                        >
-                          Thêm loại sản phẩm
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-warning"
-                          style={{ marginLeft: "10px" }}
-                          onClick={() => navigate("/category")}
-                        >
-                          Trở lại
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="modal fade show" tabIndex={-1} role="dialog" style={{ display: "block" }}>
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">Thêm Loại Sản Phẩm</h5>
+            <button type="button" className="btn-close" aria-label="Close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body">
+            <div className="form-group">
+              <label>Tên Loại Sản Phẩm</label>
+              <input
+                type="text"
+                className="form-control"
+                value={tenLoai}
+                onChange={(e) => setTenLoai(e.target.value)}
+              />
             </div>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Đóng
+            </button>
+            <button type="button" className="btn btn-primary" onClick={handleAddCategory}>
+              Thêm
+            </button>
           </div>
         </div>
       </div>
@@ -76,4 +57,4 @@ const Create = () => {
   );
 };
 
-export default Create;
+export default AddCategoryModal;

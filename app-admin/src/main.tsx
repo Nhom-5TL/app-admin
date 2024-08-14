@@ -26,7 +26,7 @@ const router = createBrowserRouter([
       { path: "/product", element: <Product /> },
       { path: "/product/create", element: <CreateProduct /> },
       { path: ":maSP", element: <EditProduct /> },
-      { path: "/category", element: <Category /> },
+      { path: "/category", element: <Category /> }, 
       { path: "/category/create", element: <Create /> },
       { path: "/category/update/:MaLoai", element: <UpdateCategory /> },
       { path: "/ThuongHieu", element: <ThuongHieu /> },
