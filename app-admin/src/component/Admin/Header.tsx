@@ -37,11 +37,6 @@ const Header = () => {
                         <span className="sub-item">Loại sản phẩm</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/admin/components/gridsystem">
-                        <span className="sub-item">Màu</span>
-                      </a>
-                    </li>
                   </ul>
                 </div>
               </li>
